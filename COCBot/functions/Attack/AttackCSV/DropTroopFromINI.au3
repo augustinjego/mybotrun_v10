@@ -142,7 +142,7 @@ Func DropTroopFromINI($sDropVectors, $iStartIndex, $iEndIndex, $aiIndexArray, $i
 			If Not $g_abAttackUseBatSpell[$g_iMatchMode] Then $bUseSpell = False
 		Case $eOgSpell
 			If Not $g_abAttackUseOvergrowthSpell[$g_iMatchMode] Then $bUseSpell = False
-		Case $eKing, $eQueen, $ePrince, $eWarden, $eChampion, $eCastle, $eWallW, $eBattleB, $eStoneS, $eSiegeB, $eLogL, $eFlameF, $eBattleD, $eTroopL
+		Case $eKing, $eQueen, $ePrince, $eWarden, $eChampion, $eDuke, $eCastle, $eWallW, $eBattleB, $eStoneS, $eSiegeB, $eLogL, $eFlameF, $eBattleD, $eTroopL
 			$bSelectTroop = False ; avoid double select
 	EndSwitch
 
@@ -240,6 +240,12 @@ Func DropTroopFromINI($sDropVectors, $iStartIndex, $iEndIndex, $aiIndexArray, $i
 								SetLog("dropHeroes(" & $pixel[0] & ", " & $pixel[1] & ",-1, -1, -1, -1," & $troopPosition & ") ")
 							Else
 								dropHeroes($pixel[0], $pixel[1], -1, -1, -1, -1, $troopPosition) ; was $g_iChampionSlot, Slot11+
+							EndIf
+						Case $eDuke
+							If $bDebug Then
+								SetLog("dropHeroes(" & $pixel[0] & ", " & $pixel[1] & ",-1, -1, -1, -1, -1," & $troopPosition & ") ")
+							Else
+								dropHeroes($pixel[0], $pixel[1], -1, -1, -1, -1, -1, $troopPosition) ; was $g_iDukeSlot, Slot11+
 							EndIf
 						Case $eCastle, $eWallW, $eBattleB, $eStoneS, $eSiegeB, $eLogL, $eFlameF, $eBattleD, $eTroopL
 							If $bDebug Then

@@ -149,7 +149,7 @@ EndFunc   ;==>NeededResources
 
 Func UpgradeHeroes()
 
-	If Not $g_bUpgradeKingEnable And Not $g_bUpgradeQueenEnable And Not $g_bUpgradePrinceEnable And Not $g_bUpgradeWardenEnable And Not $g_bUpgradeChampionEnable Then Return
+	If Not $g_bUpgradeKingEnable And Not $g_bUpgradeQueenEnable And Not $g_bUpgradePrinceEnable And Not $g_bUpgradeWardenEnable And Not $g_bUpgradeChampionEnable And Not $g_bUpgradeDukeEnable Then Return
 	If _Sleep(500) Then Return
 
 	If $g_iTownHallLevel < 7 Then
@@ -568,6 +568,17 @@ Func UpgradeHeroes()
 				If _Sleep($DELAYUPGRADEHERO1) Then Return
 			ElseIf $g_bUpgradeChampionEnable And BitAND($g_iHeroUpgradingBit, $eHeroChampion) = $eHeroChampion Then
 				If Not _DateIsValid($g_aiHeroUpgradeFinishDate[4]) Then FinishTimeCalculation("Champion")
+			EndIf
+			If Not $g_bRunState Then Return
+			; ### Dragon Duke ###
+			; The Hero Hall slot of the Duke has not been measured on a CoC 18.600.5 account that owns
+			; him, and a click at a guessed position could start another hero's upgrade and spend the
+			; Dark Elixir. Until it is measured the option only reports, it never clicks.
+			If $g_bUpgradeDukeEnable And BitAND($g_iHeroUpgradingBit, $eHeroDuke) <> $eHeroDuke Then
+				If Not $g_bDukeUpgradeNotMeasuredLogged Then
+					SetLog("Dragon Duke upgrade: Hero Hall position not measured yet, skipped", $COLOR_INFO)
+					$g_bDukeUpgradeNotMeasuredLogged = True
+				EndIf
 			EndIf
 			If Not $g_bRunState Then Return
 		EndIf
@@ -1549,7 +1560,7 @@ EndFunc   ;==>ChampionUpgrade
 
 Func ReservedBuildersForHeroes($aSetLog = True)
 	Local $iUsedBuildersForHeroes = Number(BitAND($g_iHeroUpgradingBit, $eHeroKing) = $eHeroKing ? 1 : 0) + Number(BitAND($g_iHeroUpgradingBit, $eHeroQueen) = $eHeroQueen ? 1 : 0) + _
-			Number(BitAND($g_iHeroUpgradingBit, $eHeroPrince) = $eHeroPrince ? 1 : 0) + Number(BitAND($g_iHeroUpgradingBit, $eHeroWarden) = $eHeroWarden ? 1 : 0) + Number(BitAND($g_iHeroUpgradingBit, $eHeroChampion) = $eHeroChampion ? 1 : 0)
+			Number(BitAND($g_iHeroUpgradingBit, $eHeroPrince) = $eHeroPrince ? 1 : 0) + Number(BitAND($g_iHeroUpgradingBit, $eHeroWarden) = $eHeroWarden ? 1 : 0) + Number(BitAND($g_iHeroUpgradingBit, $eHeroChampion) = $eHeroChampion ? 1 : 0) + Number(BitAND($g_iHeroUpgradingBit, $eHeroDuke) = $eHeroDuke ? 1 : 0)
 	If $aSetLog Then SetLog($iUsedBuildersForHeroes & " builder" & ($iUsedBuildersForHeroes > 1 ? "s are" : " is") & " upgrading your heroes.", $COLOR_INFO)
 
 	Local $iFreeBuildersReservedForHeroes = _Max(Number($g_iHeroReservedBuilder) - $iUsedBuildersForHeroes, 0)

@@ -25,6 +25,7 @@ Global $g_hChkABSpellsWait = 0, $g_hChkABMachineWait = 0, $g_hChkABWaitForCastle
 Global $g_hLblABSearches = 0, $g_hLblABTropies = 0, $g_hLblABArmyCamps = 0
 Global $g_hPicABHeroesWait = 0, $g_hTxtABHeroesWait = 0, $g_hPicABKingWait = 0, $g_hPicABKingSleepWait = 0, $g_hPicABQueenWait = 0, $g_hPicABQueenSleepWait = 0, _
 		$g_hPicABWardenWait = 0, $g_hPicABWardenSleepWait = 0, $g_hPicABChampionWait = 0, $g_hPicABChampionSleepWait = 0
+Global $g_hChkABDukeWait = 0, $g_hPicABDukeWait = 0, $g_hPicABDukeSleepWait = 0
 Global $g_hPicABLightSpellWait = 0, $g_hPicABHealSpellWait = 0, $g_hPicABRageSpellWait = 0, $g_hPicABJumpSpellWait = 0, $g_hPicABFreezeSpellWait = 0, _
 		$g_hPicABPoisonSpellWait = 0, $g_hPicABEarthquakeSpellWait = 0, $g_hPicABHasteSpellWait = 0
 
@@ -82,7 +83,7 @@ Func CreateAttackSearchActiveBaseSearch()
 	GUICtrlSetLimit(-1, 6)
 	$g_hLblABTropies = GUICtrlCreateLabel("-", $x + 113, $y + 2, -1, -1)
 	GUICtrlSetState(-1, $GUI_DISABLE)
-	$g_hTxtABTropiesMax = GUICtrlCreateInput("6000", $x + 120, $y, 40, 18, BitOR($GUI_SS_DEFAULT_INPUT, $ES_CENTER, $ES_NUMBER))
+	$g_hTxtABTropiesMax = GUICtrlCreateInput("36", $x + 120, $y, 40, 18, BitOR($GUI_SS_DEFAULT_INPUT, $ES_CENTER, $ES_NUMBER))
 	GUICtrlSetState(-1, $GUI_DISABLE)
 	_GUICtrlSetTip(-1, GetTranslatedFileIni("MBR GUI Design Child Attack - Search", "LblActivateMaxTropies_Info_01", -1) & @CRLF & @CRLF & _
 			GetTranslatedFileIni("MBR GUI Design Child Attack - Search", "ChkActivateTropies_Info_02", -1))
@@ -155,6 +156,16 @@ Func CreateAttackSearchActiveBaseSearch()
 	$g_hPicABChampionWait = _GUICtrlCreateIcon($g_sLibIconPath, $eIcnChampion, $x - 15, $y + 5, 25, 25)
 	_GUICtrlSetTip(-1, $sTxtTip)
 	$g_hPicABChampionSleepWait = _GUICtrlCreateIcon($g_sLibIconPath, $eIcnSleepingChampion, $x - 15, $y + 5, 25, 25)
+	GUICtrlSetState(-1, $GUI_HIDE)
+
+	$x += 35
+	$g_hChkABDukeWait = GUICtrlCreateCheckbox("", $x - 9, $y + 35, 16, 16)
+	$sTxtTip = GetTranslatedFileIni("MBR GUI Design Child Attack - Search", "TxtDukeWait_Info_01", "Wait for Dragon Duke to be ready before attacking...") & @CRLF & _
+			GetTranslatedFileIni("MBR GUI Design Child Attack - Search", "TxtDukeWait_Info_02", "Enabled with TownHall 15")
+	_GUICtrlSetTip(-1, $sTxtTip)
+	$g_hPicABDukeWait = _GUICtrlCreateIcon($g_sLibIconPath, $eIcnDuke, $x - 15, $y + 5, 25, 25)
+	_GUICtrlSetTip(-1, $sTxtTip)
+	$g_hPicABDukeSleepWait = _GUICtrlCreateIcon($g_sLibIconPath, $eIcnSleepingDuke, $x - 15, $y + 5, 25, 25)
 	GUICtrlSetState(-1, $GUI_HIDE)
 
 	$y += 58

@@ -1,0 +1,10 @@
+League tiers (CoC 18.600): the bot reads the tier number (1-36) on the league badge with its own digit recognizer; Village Report and search log show "Valkyrie 13" style names.
+Every setting that still compared against trophy counts now uses league tiers: search filters (1-36), Legend league detection, cloud wait, Clan Games challenges.
+"Trophy Settings" tab replaced by a "League" tab with a single "Max. league tier"; "Max.Trophy" bot conditions renamed "Max.League". Old profile values above 36 are clamped automatically.
+Treasury: the Treasury button of the Clan Castle bar is found by colour (the old template no longer matched), full bars detected by green dominance.
+Star Bonus and "upgrades finished while you were away" popups are closed automatically (green Okay button found by colour).
+Battle reward cards (33% / 77%) are picked and their gold/elixir counted in the loot stats.
+Discord notifications: webhook option mirroring Telegram (same messages, files and alerts), new Notify tab icons.
+Dragon Duke added to the hero settings; hero level caps and TH18 tables refreshed from the game files.
+Fixed the crash when hiding shields (array overflow) and the "Monkey needs more bananas" shield reading error.
+Next button found again on the village search screen.

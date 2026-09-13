@@ -26,20 +26,17 @@ Func WaitForClouds()
 	Local $maxSearchCount = 360 ; $maxSearchCount * 250ms ($DELAYGETRESOURCES1) = seconds wait time before reset in lower leagues: 360*250ms = 1.5 minutes
 	Local $maxLongSearchCount = 3 ; $maxLongSearchCount * $maxSearchCount = seconds total wait time in higher leagues: ; 4.5 minutes, set a value here but is never used unless error
 
-	Switch Int($g_aiCurrentLoot[$eLootTrophy]) ; add randomization to SearchCounters (long cloud keep alive time) for higher leagues
-		Case 3700 To 4099 ; champion 1 league
+	Switch Int($g_aiCurrentLoot[$eLootTrophy]) ; add randomization to SearchCounters (long cloud keep alive time) for higher leagues (CoC 18.600 tiers)
+		Case $g_iLeagueTierPekka To $g_iLeagueTierTitan - 1 ; P.E.K.K.A tiers 22-24 (old Champion)
 			$maxSearchCount = Random(360, 650, 1) ; random range 1.5-2.8 minutes
 			$maxLongSearchCount = Random(1, 2, 1) ; random range 1.5-5.6 minutes
-		Case 4100 To 4399 ; Titan 3 league
-			$maxSearchCount = Random(360, 650, 1) ; random range 1.5-2.8 minutes
-			$maxLongSearchCount = Random(1, 2, 1) ; random range 1.5-5.6 minutes
-		Case 4400 To 4699 ; Titan 2 league
+		Case $g_iLeagueTierTitan To $g_iLeagueTierTitan + 2 ; Titan tiers 25-27
 			$maxSearchCount = Random(360, 650, 1) ; random range 1.5-2.8 minutes
 			$maxLongSearchCount = Random(1, 3, 1) ; random range 1.5-8.4 minutes
-		Case 4700 To 4999 ; Titan 1 league
+		Case $g_iLeagueTierTitan + 3 To $g_iLeagueTierLegend - 1 ; Dragon and Electro tiers 28-33
 			$maxSearchCount = Random(360, 650, 1) ; random range 1.5-2.8 minutes
 			$maxLongSearchCount = Random(3, 5, 1) ; random range 4.5-14 minutes
-		Case 5000 To 6500 ; Legend league
+		Case $g_iLeagueTierLegend To $g_iLeagueTierMax ; Legend tiers 34-36
 			$maxSearchCount = Random(360, 650, 1) ; random range 2.5-3.5 minutes
 			$maxLongSearchCount = Random(3, 5, 1) ; random range 4.5-14 minutes
 	EndSwitch
@@ -134,7 +131,7 @@ Func EnableLongSearch()
 
 	SetDebugLog("Begin EnableLongSearch:", $COLOR_DEBUG1)
 
-	If Int($g_aiCurrentLoot[$eLootTrophy]) < 3700 Then ; If not searching Champion 1 or higher, skip long waiting to return and restart due error
+	If Int($g_aiCurrentLoot[$eLootTrophy]) < $g_iLeagueTierPekka Then ; below the P.E.K.K.A tiers (old Champion 1), skip long waiting to return and restart due error
 		SetDebugLog("Long cloud search not enabled due trophy count: " & $g_aiCurrentLoot[$eLootTrophy], $COLOR_DEBUG)
 		Return False
 	EndIf

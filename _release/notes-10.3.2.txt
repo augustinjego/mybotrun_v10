@@ -1,0 +1,1 @@
+﻿Stats tab: the league badge shows the last tier read (saved in the profile) as soon as the bot opens, and follows the badge in search mode, instead of staying "Unranked" until the first Village Report.

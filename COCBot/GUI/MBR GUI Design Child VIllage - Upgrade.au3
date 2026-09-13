@@ -28,6 +28,7 @@ Global $g_hChkUpgradeKing = 0, $g_hChkUpgradeQueen = 0, $g_hChkUpgradePrince = 0
 Global $g_hChkRepUpgradeKing = 0, $g_hChkRepUpgradeQueen = 0, $g_hChkRepUpgradePrince = 0, $g_hChkRepUpgradeWarden = 0, $g_hChkRepUpgradeChampion = 0
 Global $g_hCmbHeroReservedBuilder = 0, $g_hLblHeroReservedBuilderTop = 0, $g_hLblHeroReservedBuilderBottom = 0, $g_hBtnHeroEquipment = 0
 Global $g_hChkUpgradeChampion = 0, $g_hPicChkChampionSleepWait = 0
+Global $g_hChkUpgradeDuke = 0, $g_hChkRepUpgradeDuke = 0, $g_hPicChkDukeSleepWait = 0
 
 Global $g_hChkUpgradePets[$ePetCount]
 
@@ -246,7 +247,7 @@ Func CreateHeroesSubTab()
 	_GUICtrlSetTip(-1, $sTxtTip)
 	GUICtrlSetState(-1, $GUI_HIDE)
 
-	$x += 80
+	$x += 68
 	$g_hChkUpgradeQueen = GUICtrlCreateCheckbox("", $x, $y + 23, 17, 17)
 	$sTxtTip = GetTranslatedFileIni("MBR GUI Design Child Village - Upgrade_Heroes", "ChkUpgradeQueen_Info_01", "Enable upgrading of your Queen when you have enough Dark Elixir (Saving Min. Dark Elixir)") & @CRLF & _
 			GetTranslatedFileIni("MBR GUI Design Child Village - Upgrade_Heroes", "ChkUpgradeQueen_Info_02", "You can manually locate your Hero Hall on Misc Tab") & @CRLF & _
@@ -262,7 +263,7 @@ Func CreateHeroesSubTab()
 	_GUICtrlSetTip(-1, $sTxtTip)
 	GUICtrlSetState(-1, $GUI_HIDE)
 
-	$x += 80
+	$x += 68
 	$g_hChkUpgradePrince = GUICtrlCreateCheckbox("", $x, $y + 23, 17, 17)
 	$sTxtTip = GetTranslatedFileIni("MBR GUI Design Child Village - Upgrade_Heroes", "ChkUpgradePrince_Info_01", "Enable upgrading of your Prince when you have enough Dark Elixir (Saving Min. Dark Elixir)") & @CRLF & _
 			GetTranslatedFileIni("MBR GUI Design Child Village - Upgrade_Heroes", "ChkUpgradePrince_Info_02", "You can manually locate your Hero Hall on Misc Tab") & @CRLF & _
@@ -278,7 +279,7 @@ Func CreateHeroesSubTab()
 	_GUICtrlSetTip(-1, $sTxtTip)
 	GUICtrlSetState(-1, $GUI_HIDE)
 
-	$x += 80
+	$x += 68
 	$g_hChkUpgradeWarden = GUICtrlCreateCheckbox("", $x, $y + 23, 17, 17)
 	$sTxtTip = GetTranslatedFileIni("MBR GUI Design Child Village - Upgrade_Heroes", "ChkUpgradeWarden_Info_01", "Enable upgrading of your Warden when you have enough Elixir (Saving Min. Elixir)") & @CRLF & _
 			GetTranslatedFileIni("MBR GUI Design Child Village - Upgrade_Heroes", "ChkUpgradeWarden_Info_02", "You can manually locate your Hero Hall on Misc Tab") & @CRLF & _
@@ -294,7 +295,7 @@ Func CreateHeroesSubTab()
 	_GUICtrlSetTip(-1, $sTxtTip)
 	GUICtrlSetState(-1, $GUI_HIDE)
 
-	$x += 80
+	$x += 68
 	$g_hChkUpgradeChampion = GUICtrlCreateCheckbox("", $x, $y + 23, 17, 17)
 	$sTxtTip = GetTranslatedFileIni("MBR GUI Design Child Village - Upgrade_Heroes", "ChkUpgradeChampion_Info_01", "Enable upgrading of your Royal Champion when you have enough Dark Elixir (Saving Min. Dark Elixir)") & @CRLF & _
 			GetTranslatedFileIni("MBR GUI Design Child Village - Upgrade_Heroes", "ChkUpgradeChampion_Info_02", "You can manually locate your Hero Hall on Misc Tab") & @CRLF & _
@@ -307,6 +308,22 @@ Func CreateHeroesSubTab()
 	_GUICtrlCreateIcon($g_sLibIconPath, $eIcnChampionUpgr, $x + 18, $y + 7, 48, 48)
 	_GUICtrlSetTip(-1, $sTxtTip)
 	$g_hPicChkChampionSleepWait = _GUICtrlCreateIcon($g_sLibIconPath, $eIcnSleepingChampion, $x + 18, $y + 7, 48, 48)
+	_GUICtrlSetTip(-1, $sTxtTip)
+	GUICtrlSetState(-1, $GUI_HIDE)
+
+	$x += 68
+	$g_hChkUpgradeDuke = GUICtrlCreateCheckbox("", $x, $y + 23, 17, 17)
+	$sTxtTip = GetTranslatedFileIni("MBR GUI Design Child Village - Upgrade_Heroes", "ChkUpgradeDuke_Info_01", "Enable upgrading of your Dragon Duke when you have enough Dark Elixir (Saving Min. Dark Elixir)") & @CRLF & _
+			GetTranslatedFileIni("MBR GUI Design Child Village - Upgrade_Heroes", "ChkUpgradeDuke_Info_02", "You can manually locate your Hero Hall on Misc Tab") & @CRLF & _
+			GetTranslatedFileIni("MBR GUI Design Child Village - Upgrade_Heroes", "ChkUpgradeHeroes_Info_01", -1) & @CRLF & _
+			GetTranslatedFileIni("MBR GUI Design Child Village - Upgrade_Heroes", "ChkUpgradeDuke_Info_03", "Enabled with TownHall 15 and higher")
+	_GUICtrlSetTip(-1, $sTxtTip)
+	GUICtrlSetOnEvent(-1, "chkUpgradeDuke")
+	$g_hChkRepUpgradeDuke = GUICtrlCreateCheckbox("Rep.", $x + 25, $y + 59, -1, 17)
+	_GUICtrlSetTip(-1, $sTxtChkRepeat)
+	_GUICtrlCreateIcon($g_sLibIconPath, $eIcnDukeUpgr, $x + 18, $y + 7, 48, 48)
+	_GUICtrlSetTip(-1, $sTxtTip)
+	$g_hPicChkDukeSleepWait = _GUICtrlCreateIcon($g_sLibIconPath, $eIcnSleepingDuke, $x + 18, $y + 7, 48, 48)
 	_GUICtrlSetTip(-1, $sTxtTip)
 	GUICtrlSetState(-1, $GUI_HIDE)
 

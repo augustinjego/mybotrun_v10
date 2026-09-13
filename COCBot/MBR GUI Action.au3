@@ -178,6 +178,7 @@ EndFunc   ;==>BotStart
 Func BotStop()
 	CleanSuperchargeTemplates()
 	FuncEnter(BotStop)
+	NotifyDiscordLogFlush(True) ; full log to Discord option: do not keep the last lines waiting
 	; release bot slot
 	LockBotSlot(False)
 
@@ -272,7 +273,8 @@ Func BotSearchMode()
 	btnStart()
 	checkMainScreen(False)
 	If _Sleep(100) Then Return FuncReturn()
-	$g_aiCurrentLoot[$eLootTrophy] = getTrophyMainScreen($aTrophies[0], $aTrophies[1]) ; get OCR to read current Village Trophies
+	$g_aiCurrentLoot[$eLootTrophy] = getLeagueTier($aLeagueTierMain) ; league tier since CoC 18.600, trophies are gone ; get OCR to read current Village Trophies
+	UpdateLeagueDisplay($g_aiCurrentLoot[$eLootTrophy])
 	If _Sleep(100) Then Return FuncReturn()
 	CheckIfArmyIsReady()
 	ClickAway()

@@ -385,7 +385,7 @@ Func algorithm_AllTroops() ;Attack Algorithm for all existing troops
 	$g_aiDeployHeroesPosition[0] = -1
 	$g_aiDeployHeroesPosition[1] = -1
 
-	LaunchTroop2($listInfoDeploy, $g_iClanCastleSlot, $g_iKingSlot, $g_iQueenSlot, $g_iPrinceSlot, $g_iWardenSlot, $g_iChampionSlot)
+	LaunchTroop2($listInfoDeploy, $g_iClanCastleSlot, $g_iKingSlot, $g_iQueenSlot, $g_iPrinceSlot, $g_iWardenSlot, $g_iChampionSlot, $g_iDukeSlot)
 
 	CheckHeroesHealth()
 
@@ -415,6 +415,7 @@ Func SetSlotSpecialTroops()
 	$g_iPrinceSlot = -1
 	$g_iWardenSlot = -1
 	$g_iChampionSlot = -1
+	$g_iDukeSlot = -1
 	$g_iClanCastleSlot = -1
 
 	For $i = 0 To UBound($g_avAttackTroops) - 1
@@ -431,6 +432,8 @@ Func SetSlotSpecialTroops()
 			$g_iWardenSlot = $i
 		ElseIf $g_avAttackTroops[$i][0] = $eChampion Then
 			$g_iChampionSlot = $i
+		ElseIf $g_avAttackTroops[$i][0] = $eDuke Then
+			$g_iDukeSlot = $i
 		EndIf
 	Next
 
@@ -440,6 +443,7 @@ Func SetSlotSpecialTroops()
 		SetDebugLog("SetSlotSpecialTroops() Prince Slot: " & $g_iPrinceSlot, $COLOR_DEBUG)
 		SetDebugLog("SetSlotSpecialTroops() Warden Slot: " & $g_iWardenSlot, $COLOR_DEBUG)
 		SetDebugLog("SetSlotSpecialTroops() Champion Slot: " & $g_iChampionSlot, $COLOR_DEBUG)
+		SetDebugLog("SetSlotSpecialTroops() Duke Slot: " & $g_iDukeSlot, $COLOR_DEBUG)
 		SetDebugLog("SetSlotSpecialTroops() Clan Castle Slot: " & $g_iClanCastleSlot, $COLOR_DEBUG)
 	EndIf
 

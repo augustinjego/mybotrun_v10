@@ -55,33 +55,302 @@ EndFunc   ;==>PushMsg
 ; EXECUTE NOTIFY PENDING ACTIONS
 Func NotifyPendingActions()
 	SetDebugLog("Notify | NotifyPendingActions()")
-	If ($g_bNotifyTGEnable = False Or $g_sNotifyTGToken = "") Then Return
+	If Not NotifyEnabled() Then Return
 
-	NotifyRemoteControl()
+	If $g_bNotifyTGEnable And $g_sNotifyTGToken <> "" Then ; remote control reads commands, only Telegram can do that
+		NotifyRemoteControl()
 
-	If $g_bTGRequestScreenshot = True Then
-		$g_bNotifyForced = True
-		PushMsg("RequestScreenshot")
-	EndIf
-	If $g_bTGRequestBuilderInfo = True Then
-		$g_bNotifyForced = True
-		PushMsg("BuilderInfo")
-	EndIf
-	If $g_bTGRequestShieldInfo = True Then
-		$g_bNotifyForced = True
-		PushMsg("ShieldInfo")
+		If $g_bTGRequestScreenshot = True Then
+			$g_bNotifyForced = True
+			PushMsg("RequestScreenshot")
+		EndIf
+		If $g_bTGRequestBuilderInfo = True Then
+			$g_bNotifyForced = True
+			PushMsg("BuilderInfo")
+		EndIf
+		If $g_bTGRequestShieldInfo = True Then
+			$g_bNotifyForced = True
+			PushMsg("ShieldInfo")
+		EndIf
 	EndIf
 	PushMsg("BuilderIdle")
 EndFunc   ;==>NotifyPendingActions
 
+; True when at least one channel (Telegram token or Discord webhook) is set up
+Func NotifyEnabled()
+	Return ($g_bNotifyTGEnable And $g_sNotifyTGToken <> "") Or ($g_bNotifyDiscordEnable And $g_sNotifyDiscordWebhook <> "")
+EndFunc   ;==>NotifyEnabled
+
+; ONLY PUSH DISCORD MSG, same text as the Telegram one
+Func NotifyPushToDiscord($pMessage)
+	If Not $g_bNotifyDiscordEnable Or $g_sNotifyDiscordWebhook = "" Then Return
+	Local $Date = @YEAR & '-' & @MON & '-' & @MDAY
+	Local $Time = @HOUR & '.' & @MIN
+	__DiscordWebhookPost($pMessage & "%0A" & $Date & '_' & $Time)
+EndFunc   ;==>NotifyPushToDiscord
+
+; ONLY PUSH DISCORD FILES, the text and the attachment travel in one post
+Func NotifyPushFileToDiscord($File, $Folder, $body)
+	If Not $g_bNotifyDiscordEnable Or $g_sNotifyDiscordWebhook = "" Then Return
+	Local $sPath = $g_sProfilePath & "\" & $g_sProfileCurrentName & "\" & $Folder & "\" & $File
+	If Not FileExists($sPath) Then
+		SetLog("Notify Discord: Unable to send file " & $File, $COLOR_ERROR)
+		Return
+	EndIf
+	__DiscordWebhookPost($body, $sPath)
+EndFunc   ;==>NotifyPushFileToDiscord
+
+; The Notify field accepts the webhook URL as Discord copies it, or only its end "id/token" (a Discord
+; webhook is always an id plus a token, there is no token-only form like Telegram).
+Func __DiscordWebhookUrl()
+	Local $s = StringStripWS($g_sNotifyDiscordWebhook, 3)
+	If $s = "" Then Return ""
+	Local $a = StringRegExp($s, "(d{15,25}/[A-Za-z0-9_-]{30,})", $STR_REGEXPARRAYMATCH)
+	If IsArray($a) Then Return "https://discord.com/api/webhooks/" & $a[0]
+	Return $s ; unknown shape, let curl report the error
+EndFunc   ;==>__DiscordWebhookUrl
+
+; Posts to the webhook through the bundled curl, like the Telegram file upload does. The text is
+; handed to curl through a temp file, so the newlines and quotes need no escaping on the command
+; line, and the Telegram %0A line breaks become real ones. Discord caps a message at 2000 chars.
+Func __DiscordWebhookPost($sText, $sAttachment = "")
+	Local $sContent = StringReplace($sText, "%0A", @LF)
+	If StringLen($sContent) > 1990 Then $sContent = StringLeft($sContent, 1990) & "..."
+	Local $sTmp = @TempDir & "\MyBot.discord." & @AutoItPID & ".txt"
+	Local $hFile = FileOpen($sTmp, $FO_OVERWRITE + $FO_UTF8_NOBOM)
+	If $hFile = -1 Then
+		SetLog("Notify Discord: cannot write " & $sTmp, $COLOR_ERROR)
+		Return
+	EndIf
+	FileWrite($hFile, $sContent)
+	FileClose($hFile)
+	Local $sCmd = '"' & $g_sCurlPath & '" -s -S -X POST "' & __DiscordWebhookUrl() & '" -F "content=<' & $sTmp & '"'
+	If $sAttachment <> "" Then $sCmd &= ' -F "files[0]=@' & $sAttachment & '"'
+	Local $iExit = RunWait($sCmd, "", @SW_HIDE)
+	FileDelete($sTmp)
+	SetDebugLog("Discord webhook post" & ($sAttachment <> "" ? " with file" : "") & ", curl exit " & $iExit)
+	If $iExit <> 0 Then SetLog("Notify Discord: send failed (curl exit " & $iExit & ")", $COLOR_ERROR)
+EndFunc   ;==>__DiscordWebhookPost
+
+; JSON string literal (with quotes) for the webhook payloads
+Func __JsonStr($s)
+	$s = StringReplace($s, "\", "\\")
+	$s = StringReplace($s, '"', '\"')
+	$s = StringReplace($s, @CRLF, "\n")
+	$s = StringReplace($s, @LF, "\n")
+	$s = StringReplace($s, @CR, "\n")
+	$s = StringReplace($s, @TAB, "\t")
+	$s = StringRegExpReplace($s, "[\x00-\x1F]", "")
+	Return '"' & $s & '"'
+EndFunc   ;==>__JsonStr
+
+; Posts a ready JSON payload (embeds...) to the webhook, with an optional file the payload can
+; reference as "attachment://<$sAttachName>". $bWait = False fires curl and returns at once.
+Func __DiscordWebhookPostJson($sJson, $sAttachment = "", $sAttachName = "", $bWait = True)
+	Local $sTmp = @TempDir & "\MyBot.discord." & @AutoItPID & "." & Random(100000, 999999, 1) & ".json"
+	Local $hFile = FileOpen($sTmp, $FO_OVERWRITE + $FO_UTF8_NOBOM)
+	If $hFile = -1 Then
+		SetDebugLog("Notify Discord: cannot write " & $sTmp, $COLOR_ERROR)
+		Return False
+	EndIf
+	FileWrite($hFile, $sJson)
+	FileClose($hFile)
+	Local $sCmd = '"' & $g_sCurlPath & '" -s -S -X POST "' & __DiscordWebhookUrl() & '" -F "payload_json=<' & $sTmp & ';type=application/json"'
+	If $sAttachment <> "" Then $sCmd &= ' -F "files[0]=@' & $sAttachment & ($sAttachName <> "" ? ';filename=' & $sAttachName : '') & '"'
+	If $bWait Then
+		Local $iExit = RunWait($sCmd, "", @SW_HIDE)
+		FileDelete($sTmp)
+		SetDebugLog("Discord webhook json post" & ($sAttachment <> "" ? " with file" : "") & ", curl exit " & $iExit)
+		If $iExit <> 0 Then SetLog("Notify Discord: send failed (curl exit " & $iExit & ")", $COLOR_ERROR)
+		Return $iExit = 0
+	EndIf
+	; fire and forget: the temp file is swept by the next flush
+	Run(@ComSpec & ' /c "' & $sCmd & ' & del "' & $sTmp & '""', "", @SW_HIDE) ; outer quotes: cmd keeps the inner ones intact
+	Return True
+EndFunc   ;==>__DiscordWebhookPostJson
+
+; One embed card for the last raid: loot, stars, destruction, league, bonus, and the raid
+; screenshot when the "Last raid as image" option is on. Colour follows the stars.
+Func NotifyPushRaidEmbedToDiscord($sImagePath = "")
+	If Not $g_bNotifyDiscordEnable Or $g_sNotifyDiscordWebhook = "" Then Return
+	Local $iStars = Number($g_sStarsEarned)
+	Local $iColor = 0xE74C3C ; 0 star red
+	Switch $iStars
+		Case 3
+			$iColor = 0x2ECC71 ; green
+		Case 2
+			$iColor = 0xF1C40F ; yellow
+		Case 1
+			$iColor = 0xE67E22 ; orange
+	EndSwitch
+	Local $sStars = ""
+	For $i = 1 To 3
+		$sStars &= ($i <= $iStars ? ChrW(0x2B50) : ChrW(0x2606)) ; star / hollow star
+	Next
+	Local $sFields = _
+			'{"name":"Gold","value":' & __JsonStr(_NumberFormat($g_iStatsLastAttack[$eLootGold])) & ',"inline":true},' & _
+			'{"name":"Elixir","value":' & __JsonStr(_NumberFormat($g_iStatsLastAttack[$eLootElixir])) & ',"inline":true},' & _
+			'{"name":"Dark Elixir","value":' & __JsonStr(_NumberFormat($g_iStatsLastAttack[$eLootDarkElixir])) & ',"inline":true},' & _
+			'{"name":"Stars","value":' & __JsonStr($sStars) & ',"inline":true},' & _
+			'{"name":"Destruction","value":' & __JsonStr($g_sTotalDamage & " %") & ',"inline":true},' & _
+			'{"name":"League","value":' & __JsonStr(LeagueTierName($g_aiCurrentLoot[$eLootTrophy])) & ',"inline":true}'
+	If Number($g_iStatsBonusLast[$eLootGold]) > 0 Or Number($g_iStatsBonusLast[$eLootElixir]) > 0 Then
+		$sFields &= ',{"name":"Bonus","value":' & __JsonStr("G " & _NumberFormat($g_iStatsBonusLast[$eLootGold]) & "  E " & _NumberFormat($g_iStatsBonusLast[$eLootElixir])) & ',"inline":true}'
+	EndIf
+	Local $sJson = '{"embeds":[{' & _
+			'"title":' & __JsonStr($g_sNotifyOrigin & " | Last raid") & ',' & _
+			'"color":' & $iColor & ',' & _
+			'"fields":[' & $sFields & '],' & _
+			($sImagePath <> "" And FileExists($sImagePath) ? '"image":{"url":"attachment://raid.jpg"},' : '') & _
+			'"footer":{"text":' & __JsonStr("MyBot " & $g_sBotVersion & "  -  search #" & $g_iSearchCount & "  -  " & _NowTime(4)) & '}' & _
+			'}]}'
+	If $sImagePath <> "" And FileExists($sImagePath) Then
+		__DiscordWebhookPostJson($sJson, $sImagePath, "raid.jpg")
+	Else
+		__DiscordWebhookPostJson($sJson)
+	EndIf
+	SetLog("Notify Discord: last raid card has been sent!", $COLOR_SUCCESS)
+EndFunc   ;==>NotifyPushRaidEmbedToDiscord
+
+; ---- full log to Discord, in batches ----------------------------------------------------------
+; Every user-level log line is queued by _SetLog(); the queue is posted as code blocks at most
+; every $g_iNotifyDiscordLogInterval ms (Discord allows ~30 messages a minute per webhook and
+; 2000 characters per message). Posting is fire-and-forget so the bot never waits on discord.com.
+
+Func NotifyDiscordLogAdd($sTime, $sLine)
+	If Not $g_bNotifyDiscordFullLog Or Not $g_bNotifyDiscordEnable Or $g_sNotifyDiscordWebhook = "" Then Return
+	$sLine = StringStripWS(StringReplace($sLine, "```", "'''"), 3)
+	If $sLine = "" Then Return
+	If StringLen($g_sNotifyDiscordLogQueue) > 12000 Then Return ; discord.com unreachable? don't grow forever
+	$g_sNotifyDiscordLogQueue &= StringStripWS($sTime, 3) & " " & $sLine & @LF
+	If $g_hNotifyDiscordLogTimer = 0 Then $g_hNotifyDiscordLogTimer = __TimerInit()
+EndFunc   ;==>NotifyDiscordLogAdd
+
+Func NotifyDiscordLogFlush($bForce = False)
+	If $g_sNotifyDiscordLogQueue = "" Then Return
+	If Not $bForce And __TimerDiff($g_hNotifyDiscordLogTimer) < $g_iNotifyDiscordLogInterval Then Return
+	Local $sQueue = $g_sNotifyDiscordLogQueue
+	$g_sNotifyDiscordLogQueue = ""
+	$g_hNotifyDiscordLogTimer = 0
+	If Not $g_bNotifyDiscordEnable Or $g_sNotifyDiscordWebhook = "" Then Return
+	; split into <= 1900 char code blocks on line boundaries, at most 4 per flush
+	Local $aLines = StringSplit(StringTrimRight($sQueue, 1), @LF, $STR_NOCOUNT)
+	Local $sBlock = "", $iSent = 0
+	For $i = 0 To UBound($aLines) - 1
+		If StringLen($sBlock) + StringLen($aLines[$i]) + 1 > 1900 Then
+			If $iSent >= 3 Then
+				$sBlock &= "... " & (UBound($aLines) - $i) & " more lines skipped" & @LF
+				ExitLoop
+			EndIf
+			__DiscordWebhookPostJson('{"content":' & __JsonStr("```" & @LF & $sBlock & "```") & '}', "", "", $bForce)
+			$iSent += 1
+			$sBlock = ""
+		EndIf
+		$sBlock &= $aLines[$i] & @LF
+	Next
+	If $sBlock <> "" Then __DiscordWebhookPostJson('{"content":' & __JsonStr("```" & @LF & $sBlock & "```") & '}', "", "", $bForce)
+EndFunc   ;==>NotifyDiscordLogFlush
+
+; ---- "Test" buttons of the Notify tab ------------------------------------------------------------
+; Both work on the value typed in the field (not the saved config) and log a plain verdict.
+
+Func NotifyTestTelegram($sToken)
+	If _IsInternet() < 1 Then
+		SetLog("Telegram test: no internet connection", $COLOR_ERROR)
+		Return False
+	EndIf
+	; 1. the token itself
+	Local $sOut = BinaryToString(InetRead("https://api.telegram.org/bot" & $sToken & "/getMe", $INET_FORCERELOAD))
+	If Not StringInStr($sOut, '"ok":true') Then
+		SetLog("Telegram test: token refused by Telegram (check it with @BotFather)", $COLOR_ERROR)
+		Return False
+	EndIf
+	Local $aName = _StringBetween($sOut, '"username":"', '"')
+	Local $sBot = (IsArray($aName) ? "@" & $aName[0] : "the bot")
+	; 2. who to talk to: the saved chat id, or the last person who wrote to the bot
+	Local $sChat = $g_sTGChatID
+	If $sChat = "" Or $sToken <> $g_sNotifyTGToken Then
+		$sOut = BinaryToString(InetRead("https://api.telegram.org/bot" & $sToken & "/getUpdates", $INET_FORCERELOAD))
+		Local $aChat = _StringBetween($sOut, 'from":{"id":', ',"is_bot":')
+		If IsArray($aChat) Then
+			$sChat = $aChat[UBound($aChat) - 1]
+		Else
+			$sChat = ""
+		EndIf
+	EndIf
+	If $sChat = "" Then
+		SetLog("Telegram test: token OK (" & $sBot & ") but nobody has written to it yet. Open " & $sBot & " in Telegram, send it /start, then test again.", $COLOR_ERROR)
+		Return False
+	EndIf
+	; 3. the message
+	Local $sText = "MyBot " & $g_sBotVersion & " test message" & ($g_sNotifyOrigin <> "" ? " (" & $g_sNotifyOrigin & ")" : "") & "%0A" & _NowCalc()
+	$sOut = BinaryToString(InetRead("https://api.telegram.org/bot" & $sToken & "/sendMessage?chat_id=" & $sChat & "&text=" & $sText, $INET_FORCERELOAD))
+	If StringInStr($sOut, '"ok":true') Then
+		SetLog("Telegram test: message sent by " & $sBot & " to chat " & $sChat & " - check your Telegram", $COLOR_SUCCESS)
+		If $sToken = $g_sNotifyTGToken And $g_sTGChatID <> $sChat Then
+			$g_sTGChatID = $sChat ; remember it, the bot would look it up again otherwise
+			SaveConfig_600_18()
+		EndIf
+		Return True
+	EndIf
+	SetLog("Telegram test: sending failed: " & StringLeft($sOut, 160), $COLOR_ERROR)
+	Return False
+EndFunc   ;==>NotifyTestTelegram
+
+Func NotifyTestDiscord($sHook)
+	Local $a = StringRegExp($sHook, "(\d{15,25}/[A-Za-z0-9_\-]{30,})", $STR_REGEXPARRAYMATCH)
+	If Not IsArray($a) Then
+		SetLog("Discord test: this is not a webhook URL. Discord channel > Edit > Integrations > Webhooks > Copy Webhook URL", $COLOR_ERROR)
+		Return False
+	EndIf
+	Local $sUrl = "https://discord.com/api/webhooks/" & $a[0]
+	If Not FileExists($g_sCurlPath) Then
+		SetLog("Discord test: curl.exe missing at " & $g_sCurlPath, $COLOR_ERROR)
+		Return False
+	EndIf
+	Local $sTmp = @TempDir & "\MyBot.discord.test." & @AutoItPID & ".txt"
+	Local $hFile = FileOpen($sTmp, $FO_OVERWRITE + $FO_UTF8_NOBOM)
+	If $hFile = -1 Then Return False
+	FileWrite($hFile, "MyBot " & $g_sBotVersion & " test message" & ($g_sNotifyOrigin <> "" ? " (" & $g_sNotifyOrigin & ")" : "") & @LF & _NowCalc())
+	FileClose($hFile)
+	; -w prints the HTTP status once the request is done: 204 = accepted, 401/404 = bad webhook
+	Local $sCmd = '"' & $g_sCurlPath & '" -s -S -o NUL -w "%{http_code}" -X POST "' & $sUrl & '" -F "content=<' & $sTmp & '"'
+	Local $iPid = Run(@ComSpec & ' /c "' & $sCmd & '"', "", @SW_HIDE, $STDOUT_CHILD + $STDERR_CHILD) ; outer quotes: cmd keeps the inner ones intact
+	Local $sCode = ""
+	While ProcessExists($iPid)
+		$sCode &= StdoutRead($iPid)
+		Sleep(50)
+	WEnd
+	$sCode &= StdoutRead($iPid)
+	Local $sErr = StderrRead($iPid)
+	FileDelete($sTmp)
+	$sCode = StringStripWS($sCode, 3)
+	Switch $sCode
+		Case "200", "204"
+			SetLog("Discord test: message posted - check the channel", $COLOR_SUCCESS)
+			Return True
+		Case "401", "403", "404"
+			SetLog("Discord test: Discord refused the webhook (HTTP " & $sCode & "): it was deleted or the URL is wrong", $COLOR_ERROR)
+		Case "000", ""
+			SetLog("Discord test: no answer from discord.com (" & StringStripWS($sErr, 3) & ")", $COLOR_ERROR)
+		Case Else
+			SetLog("Discord test: HTTP " & $sCode & " " & StringStripWS($sErr, 3), $COLOR_ERROR)
+	EndSwitch
+	Return False
+EndFunc   ;==>NotifyTestDiscord
+
 ; ONLY PUSH TELEGRAM MSG
-Func NotifyPushToTelegram($pMessage)
+Func NotifyPushToTelegram($pMessage, $bAlsoDiscord = True)
 
 	SetDebugLog("NotifyPushToTelegram(" & $pMessage & " ): ")
 
-	If Not $g_bNotifyTGEnable Or $g_sNotifyTGToken = "" Then Return
+	If Not NotifyEnabled() Then Return
 
 	If Not IsPlanUseTelegram($pMessage) Then Return
+
+	If $bAlsoDiscord Then NotifyPushToDiscord($pMessage) ; the webhook gets every message the token gets
+
+	If Not $g_bNotifyTGEnable Or $g_sNotifyTGToken = "" Then Return
 
 	If $g_bNotifyTGEnable And $g_sNotifyTGToken <> "" Then
 		Local $Date = @YEAR & '-' & @MON & '-' & @MDAY
@@ -103,9 +372,13 @@ Func NotifyPushToTelegram($pMessage)
 EndFunc   ;==>NotifyPushToTelegram
 
 ; ONLY PUSH TELEGRAM FILES
-Func NotifyPushFileToTelegram($File, $Folder, $FileType, $body)
+Func NotifyPushFileToTelegram($File, $Folder, $FileType, $body, $bAlsoDiscord = True)
 
 	SetDebugLog("Notify | NotifyPushFileToTelegram($File, $Folder, $FileType, $body): " & $File & "," & $Folder & "," & $FileType & "," & $body)
+
+	If Not NotifyEnabled() Then Return
+
+	If $bAlsoDiscord Then NotifyPushFileToDiscord($File, $Folder, $body) ; the webhook gets every file the token gets
 
 	If Not $g_bNotifyTGEnable Or $g_sNotifyTGToken = "" Then Return
 
@@ -531,7 +804,7 @@ EndFunc   ;==>NotifyRemoteControlProc
 ; CONTROL TELEGRAM : UI ASKED PUSHES
 Func NotifyPushMessageToBoth($Message, $Source = "")
 
-	If Not $g_bNotifyTGEnable Then Return
+	If Not NotifyEnabled() Then Return
 
 	SetDebugLog("Notify | NotifyPushMessageToBoth($Message, $Source = ""): " & $Message & "," & $Source)
 	Static $iReportIdleBuilder = 0
@@ -547,6 +820,26 @@ Func NotifyPushMessageToBoth($Message, $Source = "")
 		Case "OutOfSync"
 			If $g_bNotifyAlertOutOfSync Then NotifyPushToTelegram($g_sNotifyOrigin & " | " & GetTranslatedFileIni("MBR Func_Notify", "LOG_Info_05", "Restarted after Out of Sync Error") & "%0A" & GetTranslatedFileIni("MBR Func_Notify", "Stats_Info_06", "Attacking now") & "...")
 		Case "LastRaid"
+			; Discord gets one embed card (loot, stars, %, league, screenshot) instead of the two plain
+			; Telegram messages, so the screenshot is prepared first and the Telegram pushes skip Discord.
+			Local $bDiscordCard = $g_bNotifyDiscordEnable And $g_sNotifyDiscordWebhook <> "" And ($g_bNotifyAlerLastRaidTXT Or $g_bNotifyAlerLastRaidIMG)
+			Local $sRaidImage = ""
+			If $g_bNotifyAlerLastRaidIMG Then
+				;create a temporary file to send with pushbullet...
+				Local $Date = @YEAR & "-" & @MON & "-" & @MDAY
+				Local $Time = @HOUR & "." & @MIN
+				If $g_bScreenshotLootInfo Then
+					$g_sAttackFile = $g_sLootFileName
+				Else
+					_CaptureRegion()
+					$g_sAttackFile = "Notify_" & $Date & "__" & $Time & ".jpg" ; separator __ is need  to not have conflict with saving other files if $TakeSS = 1 and $chkScreenshotLootInfo = 0
+					$hBitmap_Scaled = _GDIPlus_ImageResize($g_hBitmap, _GDIPlus_ImageGetWidth($g_hBitmap) / 2, _GDIPlus_ImageGetHeight($g_hBitmap) / 2) ;resize image
+					_GDIPlus_ImageSaveToFile($hBitmap_Scaled, $g_sProfileLootsPath & $g_sAttackFile)
+					_GDIPlus_ImageDispose($hBitmap_Scaled)
+				EndIf
+				$sRaidImage = $g_sProfileLootsPath & $g_sAttackFile
+			EndIf
+			If $bDiscordCard Then NotifyPushRaidEmbedToDiscord($sRaidImage)
 			If $g_bNotifyAlerLastRaidTXT Then
 				$g_aiCurrentLoot[$eLootTrophy] = $g_aiCurrentLoot[$eLootTrophy] + $g_iStatsLastAttack[$eLootTrophy]
 				$g_iStatsLastAttack[$eLootGold] = $g_iStatsLastAttack[$eLootGold] / 1000
@@ -560,30 +853,16 @@ Func NotifyPushMessageToBoth($Message, $Source = "")
 						"%0A" & "[" & GetTranslatedFileIni("MBR Func_Notify", "Stats-G_Info_01", "G") & "]: " & _NumberFormat($g_iStatsLastAttack[$eLootGold]) & _
 						"k  [" & GetTranslatedFileIni("MBR Func_Notify", "Stats-E_Info_01", "E") & "]: " & _NumberFormat($g_iStatsLastAttack[$eLootElixir]) & _
 						"k  [" & GetTranslatedFileIni("MBR Func_Notify", "Stats-DE_Info_01", "DE") & "]: " & _NumberFormat($g_iStatsLastAttack[$eLootDarkElixir]) & _
-						"k %0A[" & GetTranslatedFileIni("MBR Func_Notify", "Stats-T_Info_01", "T") & "]: " & $g_iStatsLastAttack[$eLootTrophy] & _
-						"  [" & GetTranslatedFileIni("MBR Func_Notify", "Stats-T_Info_01", "%") & "]: " & $g_sTotalDamage & _
-						"  [" & GetTranslatedFileIni("MBR Func_Notify", "Stats-T_Info_01", "*") & "]: " & $g_sStarsEarned & _
-						"  [Tr#]: " & $g_aiCurrentLoot[$eLootTrophy])
+						"k %0A[" & GetTranslatedFileIni("MBR Func_Notify", "Stats-Pct_Info_01", "%") & "]: " & $g_sTotalDamage & _
+						"  [" & GetTranslatedFileIni("MBR Func_Notify", "Stats-Star_Info_01", "*") & "]: " & $g_sStarsEarned & _
+						"  [League]: " & LeagueTierName($g_aiCurrentLoot[$eLootTrophy]), Not $bDiscordCard)
 				If _Sleep($DELAYPUSHMSG1) Then Return
 				SetLog("Notify Telegram: Last Raid Text has been sent!", $COLOR_SUCCESS)
 			EndIf
 			If $g_bNotifyAlerLastRaidIMG Then
-
-				;create a temporary file to send with pushbullet...
-				Local $Date = @YEAR & "-" & @MON & "-" & @MDAY
-				Local $Time = @HOUR & "." & @MIN
-				If $g_bScreenshotLootInfo Then
-					$g_sAttackFile = $g_sLootFileName
-				Else
-					_CaptureRegion()
-					$g_sAttackFile = "Notify_" & $Date & "__" & $Time & ".jpg" ; separator __ is need  to not have conflict with saving other files if $TakeSS = 1 and $chkScreenshotLootInfo = 0
-					$hBitmap_Scaled = _GDIPlus_ImageResize($g_hBitmap, _GDIPlus_ImageGetWidth($g_hBitmap) / 2, _GDIPlus_ImageGetHeight($g_hBitmap) / 2) ;resize image
-					_GDIPlus_ImageSaveToFile($hBitmap_Scaled, $g_sProfileLootsPath & $g_sAttackFile)
-					_GDIPlus_ImageDispose($hBitmap_Scaled)
-				EndIf
 				;push the file
 				SetLog("Notify Telegram: Last Raid screenshot has been sent!", $COLOR_SUCCESS)
-				NotifyPushFileToTelegram($g_sAttackFile, "Loots", "image/jpeg", $g_sNotifyOrigin & " | " & "Last Raid" & "%0A" & $g_sAttackFile)
+				NotifyPushFileToTelegram($g_sAttackFile, "Loots", "image/jpeg", $g_sNotifyOrigin & " | " & "Last Raid" & "%0A" & $g_sAttackFile, Not $bDiscordCard)
 				;wait a second and then delete the file
 				If _Sleep($DELAYPUSHMSG1) Then Return
 				Local $iDelete = FileDelete($g_sProfileLootsPath & $g_sAttackFile)

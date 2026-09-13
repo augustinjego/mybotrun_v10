@@ -555,6 +555,8 @@ Global Enum $eIcnArcher = 1, $eIcnDonArcher, $eIcnBalloon, $eIcnDonBalloon, $eIc
 		$eIcnSeekingShield, $eIcnGauntlet, $eIcnBlacksmith, $eIcnFrozenArrow, $eIcnHogPuppet, $eIcnHasteVial, $eIcnOvergrowthSpell, $eIcnFireball, $eIcnAngryJelly, $eIcnSpikyBall, $eIcnRocketSpear, $eIcnDruid, $eIcnMagicMirror, _
 		$eIcnLavaloonPuppet, $eHdV17, $eIcnTH17, $eWall18, $eIcnHelperHut, $eIcnThrower, $eIcnReviveSpell, $eIcnHeroHall, $eIcnHenchmenPuppet, $eIcnDarkOrb, $eIcnPrince, $eIcnPrinceUpgr, $eIcnPrinceBoost, _
 		$eIcnLocked, $eIcnSleepingPrince, $eIcnElectroBoots, $eIcnSnakeBracelet, $eIcnMetalPants, $eIcnTroopL, $eIcnFurnace, $eIcnNobleIron, $eIcnPetSneezy, $eIcnActionFigure
+; The icon library carries no Dragon Duke art yet, so the Duke borrows the Dragon icon everywhere
+Global Const $eIcnDuke = $eIcnDragon, $eIcnDukeUpgr = $eIcnDragon, $eIcnDukeBoost = $eIcnDragon, $eIcnSleepingDuke = $eIcnLocked
 
 Global $eIcnDonBlank = $eIcnDonBlacklist
 Global $eIcnOptions = $eIcnDonBlacklist
@@ -611,7 +613,7 @@ Global Const $DROPLINE_DROPPOINTS_ONLY = 4
 Global Enum $eBarb, $eSBarb, $eArch, $eSArch, $eGiant, $eSGiant, $eGobl, $eSGobl, $eWall, $eSWall, $eBall, $eRBall, $eWiza, $eSWiza, $eHeal, _
 		$eDrag, $eSDrag, $ePekk, $eBabyD, $eInfernoD, $eMine, $eSMine, $eEDrag, $eYeti, $eRDrag, $eETitan, $eRootR, $eThrower, _
 		$eMini, $eSMini, $eHogs, $eSHogs, $eValk, $eSValk, $eGole, $eWitc, $eSWitc, $eLava, $eIceH, $eBowl, $eSBowl, $eIceG, $eHunt, $eAppWard, $eDruid, $eFurn, _
-		$eKing, $eQueen, $ePrince, $eWarden, $eChampion, $eCastle, _
+		$eKing, $eQueen, $ePrince, $eWarden, $eChampion, $eDuke, $eCastle, _
 		$eLSpell, $eHSpell, $eRSpell, $eJSpell, $eFSpell, $eCSpell, $eISpell, $eReSpell, $eRvSpell, $ePSpell, $eESpell, $eHaSpell, $eSkSpell, $eBtSpell, $eOgSpell, _
 		$eWallW, $eBattleB, $eStoneS, $eSiegeB, $eLogL, $eFlameF, $eBattleD, $eTroopL, $eArmyCount
 
@@ -721,21 +723,23 @@ Global Const $g_aiSiegeMachineDonateXP[$eSiegeMachineCount] = [30, 30, 30, 30, 3
 Global Const $g_aiSiegesDonationCost[$eSiegeMachineCount] = [45, 45, 45, 45,45, 45, 45, 45]
 
 ; Hero Bitmaped Values
-Global Enum $eHeroNone = 0, $eHeroKing = 1, $eHeroQueen = 2, $eHeroPrince = 4, $eHeroWarden = 8, $eHeroChampion = 16
+Global Enum $eHeroNone = 0, $eHeroKing = 1, $eHeroQueen = 2, $eHeroPrince = 4, $eHeroWarden = 8, $eHeroChampion = 16, $eHeroDuke = 32
 
 ; Hero standard values
-Global Enum $eHeroBarbarianKing, $eHeroArcherQueen, $eHeroMinionPrince, $eHeroGrandWarden, $eHeroRoyalChampion, $eHeroCount
+Global Enum $eHeroBarbarianKing, $eHeroArcherQueen, $eHeroMinionPrince, $eHeroGrandWarden, $eHeroRoyalChampion, $eHeroDragonDuke, $eHeroCount
 Global Const $g_aiHeroOrderIcon[$eHeroCount + 1] = [ _
-		$eIcnOptions, $eIcnKing, $eIcnQueen, $eIcnPrince, $eIcnWarden, $eIcnChampion]
-Global Const $g_asHeroNames[$eHeroCount] = ["Barbarian King", "Archer Queen", "Minion Prince", "Grand Warden", "Royal Champion"]
-Global Const $g_asHeroShortNames[$eHeroCount] = ["King", "Queen", "Prince", "Warden", "Champion"]
-Global $g_aiHeroBoost[$eHeroCount] = ["1970/01/01 00:00:00", "1970/01/01 00:00:00", "1970/01/01 00:00:00", "1970/01/01 00:00:00", "1970/01/01 00:00:00"] ; Use Epoch as standard values :)
-Global $g_aiHeroUpgradeFinishDate[$eHeroCount] = [0, 0, 0, 0, 0], $g_aiHeroNeededResource[$eHeroCount] = [0, 0, 0, 0, 0]
+		$eIcnOptions, $eIcnKing, $eIcnQueen, $eIcnPrince, $eIcnWarden, $eIcnChampion, $eIcnDuke]
+Global Const $g_asHeroNames[$eHeroCount] = ["Barbarian King", "Archer Queen", "Minion Prince", "Grand Warden", "Royal Champion", "Dragon Duke"]
+Global Const $g_asHeroShortNames[$eHeroCount] = ["King", "Queen", "Prince", "Warden", "Champion", "Duke"]
+Global $g_aiHeroBoost[$eHeroCount] = ["1970/01/01 00:00:00", "1970/01/01 00:00:00", "1970/01/01 00:00:00", "1970/01/01 00:00:00", "1970/01/01 00:00:00", "1970/01/01 00:00:00"] ; Use Epoch as standard values :)
+Global $g_aiHeroUpgradeFinishDate[$eHeroCount] = [0, 0, 0, 0, 0, 0], $g_aiHeroNeededResource[$eHeroCount] = [0, 0, 0, 0, 0, 0]
 Global $g_bFirstStartForHiddenHero = 1
 
 ; Leagues
 Global $g_bLeagueAttack = False
 Global Enum $eLeagueUnranked, $eLeagueBronze, $eLeagueSilver, $eLeagueGold, $eLeagueCrystal, $eLeagueMaster, $eLeagueChampion, $eLeagueTitan, $eLeagueLegend, $eLeagueCount
+; CoC 18.600 league tiers (1-36) carried in $g_aiCurrentLoot[$eLootTrophy]: first tier of the leagues the code keys on
+Global Const $g_iLeagueTierPekka = 22, $g_iLeagueTierTitan = 25, $g_iLeagueTierLegend = 34, $g_iLeagueTierMax = 36
 Global Const $g_asLeagueDetails[22][5] = [ _
 		["0", "Bronze III", "0", "B3", "400"], ["1000", "Bronze II", "0", "B2", "500"], ["1300", "Bronze I", "0", "B1", "600"], _
 		["2600", "Silver III", "0", "S3", "800"], ["3700", "Silver II", "0", "S2", "1000"], ["4800", "Silver I", "0", "S1", "1200"], _
@@ -968,8 +972,8 @@ Global $g_iDonateSkipNearFullPercent = 90
 ; Lab
 Global $g_bAutoLabUpgradeEnable = False, $g_iCmbLaboratory = 0, $g_bAutoStarLabUpgradeEnable = False, $g_iCmbStarLaboratory = 0
 ; Heroes
-Global $g_bUpgradeKingEnable = False, $g_bUpgradeQueenEnable = False, $g_bUpgradePrinceEnable = False, $g_bUpgradeWardenEnable = False, $g_bUpgradeChampionEnable = False, $g_iHeroReservedBuilder = 0
-Global $g_bRepUpgradeKingEnable = False, $g_bRepUpgradeQueenEnable = False, $g_bRepUpgradePrinceEnable = False, $g_bRepUpgradeWardenEnable = False, $g_bRepUpgradeChampionEnable = False
+Global $g_bUpgradeKingEnable = False, $g_bUpgradeQueenEnable = False, $g_bUpgradePrinceEnable = False, $g_bUpgradeWardenEnable = False, $g_bUpgradeChampionEnable = False, $g_bUpgradeDukeEnable = False, $g_iHeroReservedBuilder = 0
+Global $g_bRepUpgradeKingEnable = False, $g_bRepUpgradeQueenEnable = False, $g_bRepUpgradePrinceEnable = False, $g_bRepUpgradeWardenEnable = False, $g_bRepUpgradeChampionEnable = False, $g_bRepUpgradeDukeEnable = False
 Global $bCheckValuesForWarden = False
 ;Buildings
 Global Const $g_iUpgradeSlots = 14
@@ -1048,6 +1052,9 @@ Global $g_sAttackFile = ""
 
 ;Telegram
 Global $g_bNotifyTGEnable = False, $g_sNotifyTGToken = ""
+;Discord, a webhook URL receives the same messages and files as the Telegram token
+Global $g_bNotifyDiscordEnable = False, $g_sNotifyDiscordWebhook = "", $g_bNotifyDiscordFullLog = False
+Global $g_sNotifyDiscordLogQueue = "", $g_hNotifyDiscordLogTimer = 0, $g_iNotifyDiscordLogInterval = 20000 ; full log to Discord: queued lines, batch timer, batch interval ms
 ;Remote Control
 Global $g_bNotifyRemoteEnable = False, $g_sNotifyOrigin = "", $g_bNotifyDeleteAllPushesOnStart = False, $g_bNotifyDeletePushesOlderThan = False, $g_iNotifyDeletePushesOlderThanHours = 4
 ;Alerts
@@ -1099,7 +1106,7 @@ Global $g_bAllBarracksUpgd = False
 
 ; <><><><> Attack Plan / Train Army / Boost <><><><>
 Global $g_iCmbBoostBarracks = 0, $g_iCmbBoostSpellFactory = 0, $g_iCmbBoostWorkshop = 0, $g_iCmbBoostBarbarianKing = 0, $g_iCmbBoostArcherQueen = 0, $g_iCmbBoostMinionPrince = 0, _
-		$g_iCmbBoostWarden = 0, $g_iCmbBoostChampion = 0, $g_iCmbBoostEverything = 0
+		$g_iCmbBoostWarden = 0, $g_iCmbBoostChampion = 0, $g_iCmbBoostDuke = 0, $g_iCmbBoostEverything = 0
 Global $g_abBoostBarracksHours[24] = [True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True]
 
 ; <><><><> Attack Plan / Train Army / Train Order <><><><>
@@ -1118,8 +1125,8 @@ Global $g_aiTrainOrder[$eTroopCount] = [ _
 		$eTroopLavaHound, $eTroopIceHound, $eTroopBowler, $eTroopSuperBowler, $eTroopIceGolem, $eTroopHeadhunter, $eTroopAppWard, $eTroopDruid, $eTroopFurnace]
 
 Global $bCheckHeroOrder[8] = [False, False, False, False, False, False, False, False]
-Global $g_aiHeroSlotOrder[$eHeroCount] = [$eHeroBarbarianKing, $eHeroArcherQueen, $eHeroMinionPrince, $eHeroGrandWarden, $eHeroRoyalChampion]
-Global $g_aiCmbCustomHeroOrder[$eHeroCount] = [-1, -1, -1, -1, -1]
+Global $g_aiHeroSlotOrder[$eHeroCount] = [$eHeroBarbarianKing, $eHeroArcherQueen, $eHeroMinionPrince, $eHeroGrandWarden, $eHeroRoyalChampion, $eHeroDragonDuke]
+Global $g_aiCmbCustomHeroOrder[$eHeroCount] = [-1, -1, -1, -1, -1, -1]
 
 ; Spells Brew Order
 Global Const $g_aiSpellsOrderIcon[$eSpellCount + 1] = [ _
@@ -1247,6 +1254,9 @@ Global $g_iPercentageDamage = 0
 ; which resets both values the same way it resets $g_iPercentageDamage above.
 Global $g_iBattleRewardGold = 0, $g_iBattleRewardElixir = 0
 Global $g_bBattleRewardTaken = False ; keeps one panel from being picked, and counted, twice
+Global $g_iBattleRewardScans = 0 ; scans of the current panel, a card is only clicked on a settled one
+Global $g_bDukeUpgradeNotMeasuredLogged = False ; UpgradeHeroes reports the missing Duke slot measurement once per run
+Global $g_bDropTrophyObsoleteLogged = False ; Drop Trophy reports once that trophies are gone (CoC 18.600 league tiers)
 
 ; <><><><> Attack Plan / Search & Attack / Deadbase / End Battle <><><><>
 ; <<< nothing here - all in common Search & Attack grouping >>>
@@ -1283,9 +1293,9 @@ Global $g_asHeroHealTime[$eHeroCount - 1] = ["", "", "", ""]
 Global $eHeroSlots = 4
 
 ; <><><><> Attack Plan / Search & Attack / Options / Attack <><><><>
-Global $g_iActivateQueen = 0, $g_iActivateKing = 0, $g_iActivateWarden = 0, $g_iActivateChampion = 0, $g_iActivatePrince = 0
-Global $g_iDelayActivateQueen = 9000, $g_iDelayActivateKing = 9000, $g_iDelayActivateWarden = 10000, $g_iDelayActivateChampion = 9000, $g_iDelayActivatePrince = 9000
-Global $g_aHeroesTimerActivation[$eHeroCount] = [0, 0, 0, 0, 0] ; $eHeroBarbarianKing | $eHeroArcherQueen | $eHeroMinionPrince | $eHeroGrandWarden | $eHeroRoyalChampion
+Global $g_iActivateQueen = 0, $g_iActivateKing = 0, $g_iActivateWarden = 0, $g_iActivateChampion = 0, $g_iActivatePrince = 0, $g_iActivateDuke = 0
+Global $g_iDelayActivateQueen = 9000, $g_iDelayActivateKing = 9000, $g_iDelayActivateWarden = 10000, $g_iDelayActivateChampion = 9000, $g_iDelayActivatePrince = 9000, $g_iDelayActivateDuke = 9000
+Global $g_aHeroesTimerActivation[$eHeroCount] = [0, 0, 0, 0, 0, 0] ; $eHeroBarbarianKing | $eHeroArcherQueen | $eHeroMinionPrince | $eHeroGrandWarden | $eHeroRoyalChampion | $eHeroDragonDuke
 Global $g_bAttackPlannerEnable = False, $g_bAttackPlannerCloseCoC = False, $g_bAttackPlannerCloseAll = False, $g_bAttackPlannerSuspendComputer = False, $g_bAttackPlannerRandomEnable = False, _
 		$g_iAttackPlannerRandomTime = 0, $g_iAttackPlannerRandomTime = 0, $g_bAttackPlannerDayLimit = False, $g_iAttackPlannerDayMin = 12, $g_iAttackPlannerDayMax = 15
 Global $g_abPlannedAttackWeekDays[7] = [True, True, True, True, True, True, True]
@@ -1528,16 +1538,18 @@ EndFunc   ;==>TranslateTroopNames
 
 ;Upgrading - Wall
 ;First cost is for upgrade to walls level 5.  MBR doesn't support walls until level 4.
-Global Const $g_aiWallCost[14] = [20000, 30000, 50000, 75000, 100000, 200000, 500000, 1000000, 1500000, 2000000, 3000000, 4000000, 5000000, 8000000] ; Updated for March 25
+Global Const $g_aiWallCost[14] = [20000, 30000, 50000, 75000, 100000, 200000, 500000, 1000000, 1500000, 2000000, 3000000, 4000000, 5000000, 7000000] ; Updated for March 25
 Global $g_iWallCost = 0
 
 ; Upgrading - Heroes
 ; Hero Upgrade Costs = Dark Elixir in xxxK
-Global Const $g_iMaxKingLevel = 100
-Global Const $g_iMaxQueenLevel = 100
-Global Const $g_iMaxWardenLevel = 75
-Global Const $g_iMaxChampionLevel = 50
-Global Const $g_iMaxPrinceLevel = 90
+; Levels and costs below are read from the CoC 18.600.5 game data (assets/logic/heroes.csv)
+Global Const $g_iMaxKingLevel = 110
+Global Const $g_iMaxQueenLevel = 110
+Global Const $g_iMaxWardenLevel = 85
+Global Const $g_iMaxChampionLevel = 55
+Global Const $g_iMaxPrinceLevel = 95
+Global Const $g_iMaxDukeLevel = 25
 
 ;King upgrade costs, xx.xK
 Global $g_iKingLevel = -1
@@ -1547,11 +1559,12 @@ Global Const $g_afKingUpgCost[$g_iMaxKingLevel] = [0, 5, 5.5, 6, 6.5, 7, 7.5, 8,
 		17, 19, 21, 23, 25, 27, 29, 31, 33, 35, _
 		37, 39, 41, 43, 45, 47, 49, 51, 53, 55, _
 		58, 61, 64, 67, 70, 73, 76, 79, 82, 85, _
-		88, 91, 94, 97, 100, 103, 106, 109, 112, 115, _
-		119, 123, 127, 131, 135, 139, 143, 147, 151, 155, _
-		160, 165, 170, 175, 180, 185, 190, 195, 200, 205, _
-		210, 215, 220, 225, 230, 240, 250, 260, 270, 280, _
-		290, 300, 310, 320, 330, 340, 350, 360, 370, 380]
+		86, 87, 88, 89, 90, 93, 96, 99, 102, 105, _
+		107, 109, 111, 113, 115, 117, 119, 121, 123, 125, _
+		130, 135, 140, 145, 150, 155, 160, 165, 170, 175, _
+		180, 185, 190, 195, 200, 215, 225, 235, 245, 255, _
+		280, 290, 300, 310, 320, 340, 350, 360, 370, 380, _
+		400, 410, 420, 430, 450, 460, 470, 475, 485, 490]
 
 ;Queen upgrade costs, xx.xK
 Global $g_iQueenLevel = -1
@@ -1561,11 +1574,12 @@ Global Const $g_afQueenUpgCost[$g_iMaxQueenLevel] = [0, 5, 5.5, 6, 6.5, 7, 7.5, 
 		17, 19, 21, 23, 25, 27, 29, 31, 33, 35, _
 		37, 39, 41, 43, 45, 47, 49, 51, 53, 55, _
 		58, 61, 64, 67, 70, 73, 76, 79, 82, 85, _
-		88, 91, 94, 97, 100, 103, 106, 109, 112, 115, _
-		119, 123, 127, 131, 135, 139, 143, 147, 151, 155, _
-		160, 165, 170, 175, 180, 185, 190, 195, 200, 205, _
-		210, 215, 220, 225, 230, 240, 250, 260, 270, 280, _
-		290, 300, 310, 320, 330, 340, 350, 360, 370, 380]
+		86, 87, 88, 89, 90, 93, 96, 99, 102, 105, _
+		107, 109, 111, 113, 115, 117, 119, 121, 123, 125, _
+		130, 135, 140, 145, 150, 155, 160, 165, 170, 175, _
+		180, 185, 190, 195, 200, 215, 225, 235, 245, 255, _
+		280, 290, 300, 310, 320, 340, 350, 360, 370, 380, _
+		400, 410, 420, 430, 450, 460, 470, 475, 485, 490]
 
 ;Minion Prince upgrade costs, xx.xK
 Global $g_iPrinceLevel = -1
@@ -1573,33 +1587,42 @@ Global $g_iPrinceLevel = -1
 Global Const $g_afPrinceUpgCost[$g_iMaxPrinceLevel] = [0, 5, 5.5, 6, 6.5, 7, 7.5, 8, 8.5, 10, _
 		10.5, 11, 11.5, 12, 12.5, 13, 13.5, 14, 14.5, 15, _
 		17, 19, 21, 23, 25, 27, 29, 31, 33, 35, _
-		37, 39, 41, 43, 45, 47, 49, 51, 53, 55, _
-		60, 65, 70, 75, 80, 85, 90, 95, 100, 105, _
-		110, 115, 120, 125, 130, 135, 140, 145, 150, 155, _
-		160, 165, 170, 175, 180, 185, 190, 195, 200, 205, _
-		210, 215, 220, 225, 230, 240, 250, 260, 270, 280, _
-		290, 300, 310, 320, 330, 340, 350, 360, 370, 380]
+		36, 37, 38, 39, 40, 41, 42, 43, 44, 45, _
+		50, 55, 60, 65, 70, 75, 80, 85, 90, 95, _
+		100, 105, 110, 115, 120, 125, 130, 135, 140, 145, _
+		150, 155, 160, 165, 170, 175, 180, 185, 190, 195, _
+		200, 205, 210, 220, 230, 240, 250, 260, 270, 280, _
+		290, 300, 310, 320, 330, 340, 350, 360, 370, 380, _
+		400, 410, 420, 430, 450]
 
 ; Grand Warden Upgrade Costs = Elixir in xx.xK
 Global $g_iWardenLevel = -1
 ;Updated for Nov2024
 Global Const $g_afWardenUpgCost[$g_iMaxWardenLevel] = [1, 1, 1.1, 1.2, 1.4, 1.5, 1.7, 1.8, 2, 2.3, _
 		2.7, 3, 3.4, 3.7, 4.1, 4.4, 4.8, 5.1, 5.5, 6, _
-		6.5, 6.6, 6.7, 6.8, 6.9, 7, 7.1, 7.2, 7.3, 7.4, _
-		7.5, 7.6, 7.7, 7.8, 7.9, 8, 8.1, 8.2, 8.3, 8.4, _
-		8.5, 8.8, 9.1, 9.4, 9.7, 10, 10.3, 10.6, 11, 11.5, _
-		12, 12.5, 13, 13.5, 14, 14.5, 15, 15.5, 16, 16.2, _
-		16.7, 16.9, 17.1, 17.3, 17.5, 18, 18.5, 19, 19.5, 20, _
-		20.5, 21, 21.5, 22, 22.5]
+		6.1, 6.2, 6.3, 6.4, 6.5, 6.6, 6.7, 6.8, 6.9, 7, _
+		7.1, 7.2, 7.3, 7.4, 7.5, 7.6, 7.7, 7.8, 7.9, 8, _
+		8.3, 8.6, 8.9, 9.2, 9.5, 9.8, 10.1, 10.4, 10.7, 11, _
+		11.4, 11.8, 12.2, 12.6, 13, 13.4, 13.8, 14.2, 14.6, 15, _
+		15.5, 16, 16.5, 17, 17.5, 18, 18.5, 19, 19.5, 20, _
+		20.5, 21, 21.5, 22, 22.5, 24, 25.5, 27, 27.5, 28, _
+		28.5, 29, 29.5, 30, 30.5]
+
+;Dragon Duke upgrade costs, xx.xK (TH15, Hero Hall 9)
+Global $g_iDukeLevel = -1
+Global Const $g_afDukeUpgCost[$g_iMaxDukeLevel] = [0, 50, 60, 70, 80, 90, 100, 110, 120, 130, _
+		150, 175, 200, 225, 250, 275, 300, 325, 350, 375, _
+		400, 420, 440, 460, 480]
 
 ;Royal Champion upgrade costs, xx.xM
 Global $g_iChampionLevel = -1
 ;Updated for March 2025
 Global Const $g_afChampionUpgCost[$g_iMaxChampionLevel] = [0, 10, 15, 20, 25, 30, 35, 40, 45, 50, _
-		55, 60, 65, 70, 75, 80, 85, 90, 95, 100, _
-		105, 110, 115, 120, 125, 130, 135, 140, 145, 150, _
-		155, 160, 165, 170, 180, 190, 200, 210, 220, 230, _
-		250, 270, 290, 310, 330, 340, 350, 360, 370, 380]
+		53, 56, 59, 62, 65, 70, 75, 80, 85, 90, _
+		95, 100, 105, 110, 115, 120, 125, 130, 135, 140, _
+		145, 150, 155, 160, 165, 170, 175, 180, 200, 220, _
+		240, 260, 280, 300, 320, 340, 350, 360, 370, 380, _
+		400, 410, 420, 430, 450]
 
 ; Battle Machine
 Global $g_iMaxBattleMachineLevel = 35
@@ -1617,9 +1640,9 @@ Global $g_bCloudsActive = False ;True when waiting for clouds
 Global $g_bAttackActive = False ;True when attacking Village
 
 ; Search
-Global Const $g_iMaxTHLevel = 17
-Global Const $g_asTHText[$g_iMaxTHLevel - 5] = ["4-6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17"]
-Global Const $g_aiSearchCost[$g_iMaxTHLevel] = [10, 50, 75, 110, 170, 250, 380, 580, 750, 900, 1000, 1100, 1200, 1300, 1400, 1500, 1600]
+Global Const $g_iMaxTHLevel = 18 ; CoC 18.600.5, tables below read from the game data
+Global Const $g_asTHText[$g_iMaxTHLevel - 5] = ["4-6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18"]
+Global Const $g_aiSearchCost[$g_iMaxTHLevel] = [5, 10, 50, 100, 150, 250, 350, 550, 750, 900, 1000, 1100, 1200, 1300, 1400, 1500, 1600, 1700]
 Global $g_bSearchMode = False
 Global $g_bIsSearchLimit = False
 Global $g_bIsClientSyncError = False ;If true means while searching Client Out Of Sync error occurred.
@@ -1663,14 +1686,14 @@ Global Const $g_aiUseBarcherMinion[27] = [$eBarb, $eSBarb, $eArch, $eSArch, $eMi
 Global Const $g_aaiTroopsToBeUsed[11] = [$g_aiUseAllTroops, $g_aiUseBarracks, $g_aiUseBarbs, $g_aiUseArchs, $g_aiUseBarcher, $g_aiUseBarbGob, $g_aiUseArchGob, $g_aiUseBarcherGiant, $g_aiUseBarcherGobGiant, $g_aiUseBarcherHog, $g_aiUseBarcherMinion]
 Global $g_avAttackTroops[$eFurn][6] ;11 Slots of troops -  Name, Amount, x-coord (+ 11 extended slots Slot11+)
 Global $g_bFullArmy = False ;Check for full army or not
-Global $g_iKingSlot = -1, $g_iQueenSlot = -1, $g_iPrinceSlot = -1, $g_iWardenSlot = -1, $g_iChampionSlot = -1, $g_iClanCastleSlot = -1
+Global $g_iKingSlot = -1, $g_iQueenSlot = -1, $g_iPrinceSlot = -1, $g_iWardenSlot = -1, $g_iChampionSlot = -1, $g_iDukeSlot = -1, $g_iClanCastleSlot = -1
 Global $g_iTotalAttackSlot = 10, $g_bDraggedAttackBar = False ; Slot11+
 Global $g_iSiegeLevel = 1
 
 ; Attack - Heroes
 Global $g_iHeroWaitAttackNoBit[$g_iModeCount][$eHeroCount] ; Heroes wait status for attack
 Global $g_iHeroAvailable = $eHeroNone ; Hero ready status; bitmapped
-Global $g_iHeroUpgrading[$eHeroCount] = [0, 0, 0, 0, 0] ; Upgrading Heroes
+Global $g_iHeroUpgrading[$eHeroCount] = [0, 0, 0, 0, 0, 0] ; Upgrading Heroes
 Global $g_iHeroUpgradingBit = $eHeroNone ; Upgrading Heroes
 Global $g_bHaveAnyHero = -1 ; -1 Means not set yet
 Global $g_bCheckKingPower = False ; Check for King activate power
@@ -1678,7 +1701,8 @@ Global $g_bCheckQueenPower = False ; Check for Queen activate power
 Global $g_bCheckPrincePower = False ; Check for Prince activate power
 Global $g_bCheckWardenPower = False ; Check for Warden activate power
 Global $g_bCheckChampionPower = False ; Check for Champion activate power
-Global $g_bDropQueen, $g_bDropKing, $g_bDropWarden, $g_bDropChampion, $g_bDropPrince
+Global $g_bCheckDukePower = False ; Check for Duke activate power
+Global $g_bDropQueen, $g_bDropKing, $g_bDropWarden, $g_bDropChampion, $g_bDropPrince, $g_bDropDuke
 
 ; Attack - Troops
 Global $g_aiSlotInArmy[$eTroopCount] = [-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1]
@@ -1824,8 +1848,8 @@ Global $g_aWeakDefenseNames = ["None", "Eagle Artillery", "Inferno Tower", "XBow
 ; Building variables used by CSV attacks
 Global Enum $eBldgRedLine, $eBldgTownHall, $eBldgGoldM, $eBldgElixirC, $eBldgDrill, $eBldgGoldS, $eBldgElixirS, $eBldgDarkS, $eBldgEagle, $eBldgInferno, $eBldgXBow, $eBldgWizTower, $eBldgMortar, $eBldgAirDefense, $eBldgScatter, $eBldgMonolith, $eExternalWall, $eInternalWall
 Global $g_sBldgNames = ["Red Line", "Town Hall", "Gold Mine", "Elixir Collector", "Dark Elixir Drill", "Gold Storage", "Elixir Storage", "Dark Elixir Storage", "Eagle Artillery", "Inferno Tower", "XBow", "Wizard Tower", "Mortar", "Air Defense", "Scatter Shot", "Monolith", "External Wall", "Internal Wall"]
-Global Const $g_iMaxCapTroopTH[$g_iMaxTHLevel + 1] = [0, 20, 30, 70, 80, 135, 150, 200, 200, 220, 240, 260, 280, 300, 300, 320, 320, 340] ; element 0 is a dummy
-Global Const $g_iMaxCapSpellTH[$g_iMaxTHLevel + 1] = [0, 0, 0, 0, 0, 2, 4, 6, 7, 9, 11, 11, 11, 11, 11, 11, 11, 11] ; element 0 is a dummy
+Global Const $g_iMaxCapTroopTH[$g_iMaxTHLevel + 1] = [0, 20, 30, 70, 80, 135, 150, 200, 200, 220, 240, 260, 280, 300, 300, 320, 320, 340, 352] ; element 0 is a dummy
+Global Const $g_iMaxCapSpellTH[$g_iMaxTHLevel + 1] = [0, 0, 0, 0, 0, 2, 4, 6, 7, 9, 11, 11, 11, 11, 11, 11, 11, 11, 11] ; element 0 is a dummy
 Global $g_oBldgAttackInfo = ObjCreate("Scripting.Dictionary") ; stores building information of base being attacked
 $g_oBldgAttackInfo.CompareMode = 1 ; use case in-sensitve compare for key values
 
@@ -1857,31 +1881,31 @@ Global $g_oBldgLevels = ObjCreate("Scripting.Dictionary")
 ; to find max level for any defense = $g_oBldgLevels.item(Building enum)[TownHall level -1]
 
 Func _FilloBldgLevels()
-	Local Const $aBldgCollector[$g_iMaxTHLevel] = [2, 4, 6, 8, 10, 10, 11, 12, 12, 13, 14, 15, 15, 16, 16, 16, 16]
+	Local Const $aBldgCollector[$g_iMaxTHLevel] = [1, 4, 6, 8, 10, 10, 11, 12, 12, 13, 14, 15, 15, 16, 16, 17, 17, 17]
 	$g_oBldgLevels.add($eBldgGoldM, $aBldgCollector)
 	$g_oBldgLevels.add($eBldgElixirC, $aBldgCollector)
-	Local Const $aBldgDrill[$g_iMaxTHLevel] = [0, 0, 0, 0, 0, 0, 3, 3, 6, 7, 8, 9, 9, 10, 10, 10, 10]
+	Local Const $aBldgDrill[$g_iMaxTHLevel] = [0, 0, 0, 0, 0, 0, 3, 3, 6, 7, 8, 9, 9, 10, 10, 11, 11, 11]
 	$g_oBldgLevels.add($eBldgDrill, $aBldgDrill)
-	Local Const $aBldgStorage[$g_iMaxTHLevel] = [1, 3, 6, 8, 9, 10, 11, 11, 11, 11, 12, 13, 14, 15, 16, 17, 18]
+	Local Const $aBldgStorage[$g_iMaxTHLevel] = [1, 3, 6, 8, 9, 10, 11, 11, 11, 11, 12, 13, 14, 15, 16, 17, 18, 19]
 	$g_oBldgLevels.add($eBldgGoldS, $aBldgStorage)
 	$g_oBldgLevels.add($eBldgElixirS, $aBldgStorage)
-	Local Const $aBldgDarkStorage[$g_iMaxTHLevel] = [0, 0, 0, 0, 0, 0, 2, 4, 6, 6, 6, 7, 8, 9, 10, 11, 12]
+	Local Const $aBldgDarkStorage[$g_iMaxTHLevel] = [0, 0, 0, 0, 0, 0, 2, 4, 6, 6, 6, 7, 8, 9, 10, 11, 12, 13]
 	$g_oBldgLevels.add($eBldgDarkS, $aBldgDarkStorage)
-	Local Const $aBldgEagle[$g_iMaxTHLevel] = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 3, 4, 5, 6, 7, 7]
+	Local Const $aBldgEagle[$g_iMaxTHLevel] = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 3, 4, 5, 6, 7, 7, 7]
 	$g_oBldgLevels.add($eBldgEagle, $aBldgEagle)
-	Local Const $aBldgInferno[$g_iMaxTHLevel] = [0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 5, 6, 7, 8, 9, 10, 11]
+	Local Const $aBldgInferno[$g_iMaxTHLevel] = [0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 5, 6, 7, 8, 9, 10, 11, 12]
 	$g_oBldgLevels.add($eBldgInferno, $aBldgInferno)
-	Local Const $aBldgMortar[$g_iMaxTHLevel] = [0, 0, 1, 2, 3, 4, 5, 6, 7, 8, 10, 12, 13, 14, 15, 16, 17]
+	Local Const $aBldgMortar[$g_iMaxTHLevel] = [0, 0, 1, 2, 3, 4, 5, 6, 7, 8, 10, 12, 13, 14, 15, 16, 17, 18]
 	$g_oBldgLevels.add($eBldgMortar, $aBldgMortar)
-	Local Const $aBldgWizTower[$g_iMaxTHLevel] = [0, 0, 0, 0, 2, 3, 4, 6, 7, 9, 10, 11, 13, 14, 15, 16, 17]
+	Local Const $aBldgWizTower[$g_iMaxTHLevel] = [0, 0, 0, 0, 2, 3, 4, 6, 7, 9, 10, 11, 13, 14, 15, 16, 17, 17]
 	$g_oBldgLevels.add($eBldgWizTower, $aBldgWizTower)
-	Local Const $aBldgXBow[$g_iMaxTHLevel] = [0, 0, 0, 0, 0, 0, 0, 0, 3, 4, 5, 6, 8, 9, 10, 11, 12]
+	Local Const $aBldgXBow[$g_iMaxTHLevel] = [0, 0, 0, 0, 0, 0, 0, 0, 3, 4, 5, 6, 8, 9, 10, 11, 12, 13]
 	$g_oBldgLevels.add($eBldgXBow, $aBldgXBow)
-	Local Const $aBldgAirDefense[$g_iMaxTHLevel] = [0, 0, 0, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]
+	Local Const $aBldgAirDefense[$g_iMaxTHLevel] = [0, 0, 0, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]
 	$g_oBldgLevels.add($eBldgAirDefense, $aBldgAirDefense)
-	Local Const $aBldgScatterShot[$g_iMaxTHLevel] = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 3, 4, 5, 6]
+	Local Const $aBldgScatterShot[$g_iMaxTHLevel] = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 3, 4, 5, 6, 7]
 	$g_oBldgLevels.add($eBldgScatter, $aBldgScatterShot)
-	Local Const $aBldgMonolith[$g_iMaxTHLevel] = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 3, 4]
+	Local Const $aBldgMonolith[$g_iMaxTHLevel] = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 3, 4, 5]
 	$g_oBldgLevels.add($eBldgMonolith, $aBldgMonolith)
 EndFunc   ;==>_FilloBldgLevels
 _FilloBldgLevels()
@@ -1891,31 +1915,31 @@ Global $g_oBldgMaxQty = ObjCreate("Scripting.Dictionary")
 ; to find max number of bldgs for any defense = $g_oBldgMaxQty.item(Building enum)[TownHall level -1]
 
 Func _FilloBldgMaxQty()
-	Local Const $aBldgCollector[$g_iMaxTHLevel] = [1, 2, 3, 4, 5, 6, 6, 6, 6, 7, 7, 7, 7, 7, 7, 7, 7]
+	Local Const $aBldgCollector[$g_iMaxTHLevel] = [1, 2, 3, 4, 5, 6, 6, 6, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7]
 	$g_oBldgMaxQty.add($eBldgGoldM, $aBldgCollector)
 	$g_oBldgMaxQty.add($eBldgElixirC, $aBldgCollector)
-	Local Const $aBldgDrill[$g_iMaxTHLevel] = [0, 0, 0, 0, 0, 0, 1, 2, 2, 3, 3, 3, 3, 3, 3, 3, 3]
+	Local Const $aBldgDrill[$g_iMaxTHLevel] = [0, 0, 0, 0, 0, 0, 1, 2, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3]
 	$g_oBldgMaxQty.add($eBldgDrill, $aBldgDrill)
-	Local Const $aBldgStorage[$g_iMaxTHLevel] = [1, 1, 2, 2, 2, 2, 2, 3, 4, 4, 4, 4, 4, 4, 4, 4, 4]
+	Local Const $aBldgStorage[$g_iMaxTHLevel] = [1, 1, 2, 2, 2, 2, 2, 3, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4]
 	$g_oBldgMaxQty.add($eBldgGoldS, $aBldgStorage)
 	$g_oBldgMaxQty.add($eBldgElixirS, $aBldgStorage)
-	Local Const $aBldgDarkStorage[$g_iMaxTHLevel] = [0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+	Local Const $aBldgDarkStorage[$g_iMaxTHLevel] = [0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
 	$g_oBldgMaxQty.add($eBldgDarkS, $aBldgDarkStorage)
-	Local Const $aBldgEagle[$g_iMaxTHLevel] = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1]
+	Local Const $aBldgEagle[$g_iMaxTHLevel] = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1]
 	$g_oBldgMaxQty.add($eBldgEagle, $aBldgEagle)
-	Local Const $aBldgInferno[$g_iMaxTHLevel] = [0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 2, 3, 3, 3, 3, 3, 3]
+	Local Const $aBldgInferno[$g_iMaxTHLevel] = [0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 2, 3, 3, 3, 3, 3, 3, 3]
 	$g_oBldgMaxQty.add($eBldgInferno, $aBldgInferno)
-	Local Const $aBldgMortar[$g_iMaxTHLevel] = [0, 0, 1, 1, 1, 2, 3, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4]
+	Local Const $aBldgMortar[$g_iMaxTHLevel] = [0, 0, 1, 1, 1, 2, 3, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4]
 	$g_oBldgMaxQty.add($eBldgMortar, $aBldgMortar)
-	Local Const $aBldgWizTower[$g_iMaxTHLevel] = [0, 0, 0, 0, 1, 2, 2, 3, 4, 4, 5, 5, 5, 5, 5, 5, 5]
+	Local Const $aBldgWizTower[$g_iMaxTHLevel] = [0, 0, 0, 0, 1, 2, 2, 3, 4, 4, 5, 5, 5, 5, 5, 5, 5, 6]
 	$g_oBldgMaxQty.add($eBldgWizTower, $aBldgWizTower)
-	Local Const $aBldgXBow[$g_iMaxTHLevel] = [0, 0, 0, 0, 0, 0, 0, 0, 2, 3, 4, 4, 4, 4, 4, 4, 4]
+	Local Const $aBldgXBow[$g_iMaxTHLevel] = [0, 0, 0, 0, 0, 0, 0, 0, 2, 3, 4, 4, 4, 4, 4, 4, 4, 4]
 	$g_oBldgMaxQty.add($eBldgXBow, $aBldgXBow)
-	Local Const $aBldgAirDefense[$g_iMaxTHLevel] = [0, 0, 0, 1, 1, 2, 3, 3, 4, 4, 4, 4, 4, 4, 4, 4, 4]
+	Local Const $aBldgAirDefense[$g_iMaxTHLevel] = [0, 0, 0, 1, 1, 2, 3, 3, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4]
 	$g_oBldgMaxQty.add($eBldgAirDefense, $aBldgAirDefense)
-	Local Const $aBldgScatterShot[$g_iMaxTHLevel] = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 2, 2, 2, 2]
+	Local Const $aBldgScatterShot[$g_iMaxTHLevel] = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 2, 2, 2, 2, 2]
 	$g_oBldgMaxQty.add($eBldgScatter, $aBldgScatterShot)
-	Local Const $aBldgMonolith[$g_iMaxTHLevel] = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1]
+	Local Const $aBldgMonolith[$g_iMaxTHLevel] = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1]
 	$g_oBldgMaxQty.add($eBldgMonolith, $aBldgMonolith)
 EndFunc   ;==>_FilloBldgMaxQty
 _FilloBldgMaxQty()

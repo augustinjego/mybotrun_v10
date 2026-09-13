@@ -36,11 +36,11 @@ Func GetResources($bLog = True, $pMatchMode = -1) ;Reads resources
 	If _Sleep($DELAYRESPOND) Then Return
 	If _CheckPixel($aAtkHasDarkElixir, $g_bCapturePixel, Default, "HasDarkElixir1") Or _ColorCheck(_GetPixelColor(31, 151, True), Hex(0x0F0617, 6), 5) Then ; check if the village have a Dark Elixir Storage
 		$g_iSearchDark = getDarkElixirVillageSearch(48, 126 + 7)
-		$g_iSearchTrophy = getTrophyVillageSearch(48, 168 + 7)
 	Else
 		$g_iSearchDark = "N/A"
-		$g_iSearchTrophy = getTrophyVillageSearch(48, 138 + 7)
 	EndIf
+	; CoC 18.600 shows the league tier of the enemy in the badge left of the name, trophies are gone
+	$g_iSearchTrophy = getLeagueTier($aLeagueTierEnemy)
 
 	If $g_iSearchGold = $iSearchGold2 And $g_iSearchElixir = $iSearchElixir2 Then $iStuck += 1
 	If $g_iSearchGold <> $iSearchGold2 Or $g_iSearchElixir <> $iSearchElixir2 Then $iStuck = 0

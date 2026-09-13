@@ -57,6 +57,176 @@ Func getTrophyMainScreen($x_start, $y_start) ; -> Gets trophy value, top left of
 	Return getOcrAndCapture("coc-ms", $x_start, $y_start, 50, 16, True)
 EndFunc   ;==>getTrophyMainScreen
 
+; CoC 18.600 replaced trophies with 36 league tiers. The tier number is printed in cream 9 px digits
+; inside the badge; the DLL OCR fonts do not know that face, so the digits are matched against the
+; masks of ReadBadgeDigits(). Returns 0 for an unranked badge (grey hexagon, no number) or an
+; unreadable one. $aRegion = [x0, y0, x1, y1] of the digit box (see ScreenCoordinates.au3).
+Func getLeagueTier($aRegion)
+	Local $sRead = ReadBadgeDigits($aRegion[0], $aRegion[1], $aRegion[2], $aRegion[3])
+	Local $iTier = 0
+	If StringRegExp($sRead, "^[0-9]{1,2}$") Then $iTier = Number($sRead)
+	SetDebugLog("getLeagueTier(" & $aRegion[0] & "," & $aRegion[1] & ") read [" & $sRead & "] -> " & $iTier, $COLOR_DEBUG)
+	If $iTier < 1 Or $iTier > 36 Then Return 0
+	Return $iTier
+EndFunc   ;==>getLeagueTier
+
+; Reads the bright digits drawn in a small box of the screen (league badge). The box is binarised at
+; 68 % of its brightest pixel (so a dimmed screen still reads), split into glyphs on empty columns,
+; and every glyph is scored against the ten 9-row digit masks (dumped from captures, '#' = bright).
+; Returns the digits as a string, "?" for a glyph no mask fits, "" when nothing is printed there.
+Func ReadBadgeDigits($iX0, $iY0, $iX1, $iY1)
+	Local Const $asMask[10] = [ _
+			".####.|##..##|#....#|#....#|#....#|#....#|#....#|##..##|.####.", _
+			"##|##|##|.#|.#|.#|.#|.#|.#", _
+			".#####|##..##|##...#|....##|..###.|###...|##....|######|######", _
+			"######|##..##|#...##|....##|..###.|....##|##..##|##..##|.####.", _
+			".####.|.####.|##.##.|#..##.|#..##.|#..##.|######|...##.|...#..", _
+			"######|###...|##....|###...|...###|....##|#....#|##..##|.####.", _
+			".####.|##..##|#....#|#.....|######|##...#|#....#|##..##|.####.", _
+			"#####|..###|...##|...#.|..##.|..#..|..#..|.##..|.#...", _
+			"######.|##...#.|#....#.|##..##.|.####..|##...#.|#....##|##..###|.#####.", _
+			".####.|##..##|#....#|#...##|######|.....#|#....#|##..##|.####."]
+	Local Const $iMaskRows = 9
+	Local $iW = $iX1 - $iX0 + 1, $iH = $iY1 - $iY0 + 1
+	If $iW < 1 Or $iH < 1 Then Return ""
+
+	_CaptureRegion()
+	Local $afLum[$iW][$iH], $fMax = 0
+	For $y = 0 To $iH - 1
+		For $x = 0 To $iW - 1
+			Local $iCol = Dec(_GetPixelColor($iX0 + $x, $iY0 + $y, False))
+			$afLum[$x][$y] = 0.3 * BitAND(BitShift($iCol, 16), 0xFF) + 0.59 * BitAND(BitShift($iCol, 8), 0xFF) + 0.11 * BitAND($iCol, 0xFF)
+			If $afLum[$x][$y] > $fMax Then $fMax = $afLum[$x][$y]
+		Next
+	Next
+	If $fMax < 100 Then Return "" ; nothing bright enough to be a digit
+
+	Local $fThr = $fMax * 0.68
+	Local $asRows[$iH]
+	For $y = 0 To $iH - 1
+		$asRows[$y] = ""
+		For $x = 0 To $iW - 1
+			If $afLum[$x][$y] > $fThr Then
+				$asRows[$y] &= "#"
+			Else
+				$asRows[$y] &= "."
+			EndIf
+		Next
+	Next
+	SetDebugLog("ReadBadgeDigits(" & $iX0 & "," & $iY0 & ") " & _ArrayToString($asRows, "|"), $COLOR_DEBUG)
+
+	; split the box into glyphs on empty columns
+	Local $sOut = "", $x = 0
+	While $x < $iW
+		If Not __BadgeColumnUsed($asRows, $x) Then
+			$x += 1
+			ContinueLoop
+		EndIf
+		Local $iStart = $x
+		While $x < $iW And __BadgeColumnUsed($asRows, $x)
+			$x += 1
+		WEnd
+		Local $iGW = $x - $iStart
+		; vertical extent of this glyph
+		Local $iTop = $iH, $iBot = -1
+		For $y = 0 To $iH - 1
+			If StringInStr(StringMid($asRows[$y], $iStart + 1, $iGW), "#") Then
+				If $y < $iTop Then $iTop = $y
+				$iBot = $y
+			EndIf
+		Next
+		Local $iGH = $iBot - $iTop + 1
+		If $iGH < 7 Or $iGW > 8 Then ContinueLoop ; specks and badge ornaments are not digits
+		Local $asGlyph[$iGH]
+		For $y = 0 To $iGH - 1
+			$asGlyph[$y] = StringMid($asRows[$iTop + $y], $iStart + 1, $iGW)
+		Next
+		If $iGH <> $iMaskRows Then $asGlyph = __BadgeResample($asGlyph, $iGW, $iGH, $iMaskRows)
+		Local $iBest = -1, $fBest = 0
+		For $i = 0 To 9
+			Local $fScore = __BadgeMatch($asGlyph, StringSplit($asMask[$i], "|", $STR_NOCOUNT))
+			If $fScore > $fBest Then
+				$fBest = $fScore
+				$iBest = $i
+			EndIf
+		Next
+		If $fBest >= 0.5 Then
+			$sOut &= $iBest
+		Else
+			$sOut &= "?"
+		EndIf
+		SetDebugLog("  glyph x" & ($iX0 + $iStart) & " " & $iGW & "x" & $iGH & " -> " & $iBest & " (" & Round($fBest, 2) & ")", $COLOR_DEBUG)
+	WEnd
+	Return $sOut
+EndFunc   ;==>ReadBadgeDigits
+
+Func __BadgeColumnUsed(ByRef $asRows, $x)
+	For $y = 0 To UBound($asRows) - 1
+		If StringMid($asRows[$y], $x + 1, 1) = "#" Then Return True
+	Next
+	Return False
+EndFunc   ;==>__BadgeColumnUsed
+
+; nearest-neighbour resample of a glyph to $iRows rows, width scaled alike (the enemy badge prints a 10 px face)
+Func __BadgeResample(ByRef $asGlyph, $iGW, $iGH, $iRows)
+	Local $iNW = Round($iGW * $iRows / $iGH)
+	If $iNW < 1 Then $iNW = 1
+	Local $asOut[$iRows]
+	For $y = 0 To $iRows - 1
+		Local $iSY = Int($y * $iGH / $iRows)
+		If $iSY > $iGH - 1 Then $iSY = $iGH - 1
+		$asOut[$y] = ""
+		For $x = 0 To $iNW - 1
+			Local $iSX = Int($x * $iGW / $iNW)
+			If $iSX > $iGW - 1 Then $iSX = $iGW - 1
+			$asOut[$y] &= StringMid($asGlyph[$iSY], $iSX + 1, 1)
+		Next
+	Next
+	Return $asOut
+EndFunc   ;==>__BadgeResample
+
+; Jaccard similarity of two '#'/'.' glyphs (best of the 1 px shifts), 1.0 = identical
+Func __BadgeMatch(ByRef $asGlyph, $asMask)
+	Local $iGH = UBound($asGlyph), $iGW = StringLen($asGlyph[0])
+	Local $iMH = UBound($asMask), $iMW = StringLen($asMask[0])
+	Local $fBest = 0
+	For $iDY = -1 To 1
+		For $iDX = -1 To 1
+			Local $iInter = 0, $iUnion = 0
+			For $y = -1 To (($iGH > $iMH) ? $iGH : $iMH)
+				For $x = -1 To (($iGW > $iMW) ? $iGW : $iMW)
+					Local $bG = ($y >= 0 And $y < $iGH And $x >= 0 And $x < $iGW And StringMid($asGlyph[$y], $x + 1, 1) = "#")
+					Local $iMY = $y + $iDY, $iMX = $x + $iDX
+					Local $bM = ($iMY >= 0 And $iMY < $iMH And $iMX >= 0 And $iMX < $iMW And StringMid($asMask[$iMY], $iMX + 1, 1) = "#")
+					If $bG And $bM Then $iInter += 1
+					If $bG Or $bM Then $iUnion += 1
+				Next
+			Next
+			If $iUnion > 0 And $iInter / $iUnion > $fBest Then $fBest = $iInter / $iUnion
+		Next
+	Next
+	Return $fBest
+EndFunc   ;==>__BadgeMatch
+
+; Display name of a league tier, as the game prints it (league_tiers.csv + texts.csv of CoC 18.600.5)
+Func LeagueTierName($iTier)
+	Local Const $asLeagues[12] = ["Skeleton", "Barbarian", "Archer", "Wizard", "Valkyrie", "Witch", "Golem", "P.E.K.K.A", "Titan", "Dragon", "Electro", "Legend"]
+	$iTier = Number($iTier)
+	If $iTier < 1 Or $iTier > 36 Then Return "Unranked"
+	If $iTier > 33 Then
+		Local Const $asRoman[3] = ["III", "II", "I"]
+		Return "Legend " & $asRoman[$iTier - 34]
+	EndIf
+	Return $asLeagues[Int(($iTier - 1) / 3)] & " " & $iTier
+EndFunc   ;==>LeagueTierName
+
+; Two-letter league code for the AttackLog "L." column: Sk Ba Ar Wi Va Wt Go Pk Ti Dr El Le, "--" unranked
+Func LeagueTierShort($iTier)
+	Local Const $asShort[12] = ["Sk", "Ba", "Ar", "Wi", "Va", "Wt", "Go", "Pk", "Ti", "Dr", "El", "Le"]
+	$iTier = Number($iTier)
+	If $iTier < 1 Or $iTier > 36 Then Return "--"
+	Return $asShort[Int(($iTier - 1) / 3)]
+EndFunc   ;==>LeagueTierShort
 Func getTrophyLossAttackScreen($x_start, $y_start) ; 48,214 or 48,184 WO/DE -> Gets red number of trophy loss from attack screen, top left
 	Return getOcrAndCapture("coc-t-p", $x_start, $y_start, 50, 16, True)
 EndFunc   ;==>getTrophyLossAttackScreen

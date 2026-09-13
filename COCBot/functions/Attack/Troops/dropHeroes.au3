@@ -16,7 +16,7 @@
 ; Link ..........: https://github.com/MyBotRun/MyBot/wiki
 ; Example .......: No
 ; ===============================================================================================================================
-Func dropHeroes($iX, $iY, $iKingSlotNumber = -1, $iQueenSlotNumber = -1, $iPrinceSlotNumber = -1, $iWardenSlotNumber = -1, $iChampionSlotNumber = -1) ;Drops for All Heroes
+Func dropHeroes($iX, $iY, $iKingSlotNumber = -1, $iQueenSlotNumber = -1, $iPrinceSlotNumber = -1, $iWardenSlotNumber = -1, $iChampionSlotNumber = -1, $iDukeSlotNumber = -1) ;Drops for All Heroes
 	If $g_bDebugSetLog Then SetDebugLog("dropHeroes $iKingSlotNumber " & $iKingSlotNumber & " $iQueenSlotNumber " & $iQueenSlotNumber & " $iPrinceSlotNumber " & $iPrinceSlotNumber & " $iWardenSlotNumber " & $iWardenSlotNumber & " $iChampionSlotNumber " & $iChampionSlotNumber & " matchmode " & $g_iMatchMode, $COLOR_DEBUG)
 	If _Sleep($DELAYDROPHEROES1) Then Return
 	Local $bDropKing = False
@@ -24,6 +24,7 @@ Func dropHeroes($iX, $iY, $iKingSlotNumber = -1, $iQueenSlotNumber = -1, $iPrinc
 	Local $bDropPrince = False
 	Local $bDropWarden = False
 	Local $bDropChampion = False
+	Local $bDropDuke = False
 
 	;use hero if  slot (detected ) and ( ($g_iMatchMode <>DB and <>LB  ) or (check user GUI settings) )
 	If $iKingSlotNumber <> -1 And (($g_iMatchMode <> $DB And $g_iMatchMode <> $LB) Or BitAND($g_aiAttackUseHeroes[$g_iMatchMode], $eHeroKing) = $eHeroKing) Then $bDropKing = True
@@ -31,6 +32,7 @@ Func dropHeroes($iX, $iY, $iKingSlotNumber = -1, $iQueenSlotNumber = -1, $iPrinc
 	If $iPrinceSlotNumber <> -1 And (($g_iMatchMode <> $DB And $g_iMatchMode <> $LB) Or BitAND($g_aiAttackUseHeroes[$g_iMatchMode], $eHeroPrince) = $eHeroPrince) Then $bDropPrince = True
 	If $iWardenSlotNumber <> -1 And (($g_iMatchMode <> $DB And $g_iMatchMode <> $LB) Or BitAND($g_aiAttackUseHeroes[$g_iMatchMode], $eHeroWarden) = $eHeroWarden) Then $bDropWarden = True
 	If $iChampionSlotNumber <> -1 And (($g_iMatchMode <> $DB And $g_iMatchMode <> $LB) Or BitAND($g_aiAttackUseHeroes[$g_iMatchMode], $eHeroChampion) = $eHeroChampion) Then $bDropChampion = True
+	If $iDukeSlotNumber <> -1 And (($g_iMatchMode <> $DB And $g_iMatchMode <> $LB) Or BitAND($g_aiAttackUseHeroes[$g_iMatchMode], $eHeroDuke) = $eHeroDuke) Then $bDropDuke = True
 
 	For $i = 0 To UBound($g_aiCmbCustomHeroOrder) - 1
 		Switch $g_aiCmbCustomHeroOrder[$i]
@@ -49,6 +51,9 @@ Func dropHeroes($iX, $iY, $iKingSlotNumber = -1, $iQueenSlotNumber = -1, $iPrinc
 			Case 4
 				If $g_bDebugSetLog Then SetDebugLog("drop CHAMPION = " & $bDropChampion, $COLOR_DEBUG)
 				ChampionDrop($iX, $iY, $iChampionSlotNumber, $bDropChampion)
+			Case 5
+				If $g_bDebugSetLog Then SetDebugLog("drop DUKE = " & $bDropDuke, $COLOR_DEBUG)
+				DukeDrop($iX, $iY, $iDukeSlotNumber, $bDropDuke)
 		EndSwitch
 	Next
 
@@ -107,6 +112,24 @@ Func PrinceDrop($iX, $iY, $iPrinceSlotNumber = 1, $bDropPrince = False)
 	EndIf
 	If _Sleep($DELAYDROPHEROES1) Then Return
 EndFunc   ;==>PrinceDrop
+
+Func DukeDrop($iX, $iY, $iDukeSlotNumber = 1, $bDropDuke = False)
+	If $bDropDuke Then
+		SetLog("Dropping Dragon Duke at " & $iX & ", " & $iY, $COLOR_INFO)
+		SelectDropTroop($iDukeSlotNumber, 1, Default, False)
+		If _Sleep($DELAYDROPHEROES2) Then Return
+		AttackClick($iX, $iY, 1, 50, 0, "#0095")
+		If Not $g_bDropDuke Then ; check global flag, only begin hero health check on 1st hero drop as flag is reset to false after activation
+			$g_bCheckDukePower = True
+		Else
+			SetDebugLog("Duke dropped 2nd time, Check Power flag not changed") ; do nothing as hero already dropped
+		EndIf
+		$g_bDropDuke = True ; Set global flag hero dropped
+		$g_aHeroesTimerActivation[$eHeroDragonDuke] = __TimerInit() ; initialize fixed activation timer
+		If _Sleep($DELAYDROPHEROES1) Then Return
+	EndIf
+	If _Sleep($DELAYDROPHEROES1) Then Return
+EndFunc   ;==>DukeDrop
 
 Func WardenDrop($iX, $iY, $iWardenSlotNumber = -1, $bDropWarden = False)
 	If $bDropWarden Then

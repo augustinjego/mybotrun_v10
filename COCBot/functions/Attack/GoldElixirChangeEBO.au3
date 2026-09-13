@@ -52,6 +52,12 @@ Func PickBattleReward()
 	Local $aiCardX[3] = [200, 432, 663]
 	Local $aiGold[3] = [0, 0, 0], $aiElixir[3] = [0, 0, 0]
 
+	; The red banner is on screen before the three cards have finished sliding in, and the logs
+	; showed the icon scan running on half drawn cards (all counts at zero, or a lone 2 to 8).
+	; Give the animation a moment and use a fresh capture, the caller's one is already stale.
+	If _Sleep(900) Then Return False
+	_CaptureRegion()
+
 	For $i = 0 To 2
 		For $x = $aiCardX[$i] - 45 To $aiCardX[$i] + 45 Step 6
 			For $y = 305 To 395 Step 6
@@ -95,7 +101,8 @@ Func PickBattleReward()
 	; offset, and it has to be read before the click because the panel closes straight after.
 	Local $sAmount = getResourcesLoot($aiCardX[$iBest] - 68, 383)
 	Local $iAmount = Number(StringRegExpReplace($sAmount, "[^0-9]", ""))
-	If $iAmount > 0 And $iAmount < 2000000 Then
+	; A card never pays less than a few thousand, anything smaller is a glyph caught on a moving card
+	If $iAmount >= 1000 And $iAmount < 2000000 Then
 		If $sWhat = "gold" Then
 			$g_iBattleRewardGold += $iAmount
 		Else
@@ -124,11 +131,14 @@ EndFunc   ;==>PickBattleReward
 Func HandleBattleReward()
 	If Not IsBattleRewardPopupOpen() Then
 		$g_bBattleRewardTaken = False
+		$g_iBattleRewardScans = 0
 		Return False
 	EndIf
 	If Not $g_bBattleRewardTaken Then
-		$g_bBattleRewardTaken = True
-		PickBattleReward()
+		; A scan that finds no card yet (still animating) or no resource card is retried on the
+		; next loop while the panel is up; after three scans the panel is left alone for good.
+		$g_iBattleRewardScans += 1
+		If PickBattleReward() Or $g_iBattleRewardScans >= 3 Then $g_bBattleRewardTaken = True
 	EndIf
 	Return True
 EndFunc   ;==>HandleBattleReward
@@ -154,15 +164,16 @@ Func GoldElixirChangeEBO()
 	;READ RESOURCES n.1
 	$Gold1 = getGoldVillageSearch(48, 69 + 7)
 	$Elixir1 = getElixirVillageSearch(48, 69 + 29 + 7)
-	$Trophies = getTrophyVillageSearch(48, 69 + 99 + 7)
 	$Damage = getOcrOverAllDamage(780, 527 + $g_iBottomOffsetY)
 	If Number($Damage) > Number($g_iPercentageDamage) Then $g_iPercentageDamage = Number($Damage)
-	If $Trophies <> "" Then ; If trophy value found, then base has Dark Elixir
+	; CoC 18.600 dropped the trophy line that used to reveal a dark elixir row below it, so the
+	; dark elixir drop icon is checked directly, as the search screen already does
+	$Trophies = ""
+	If _CheckPixel($aAtkHasDarkElixir, $g_bCapturePixel, Default, "HasDarkElixir1") Then
 		If _Sleep($DELAYGOLDELIXIRCHANGEEBO1) Then Return
 		$DarkElixir1 = getDarkElixirVillageSearch(48, 69 + 57 + 7)
 	Else
 		$DarkElixir1 = ""
-		$Trophies = getTrophyVillageSearch(48, 69 + 69 + 7)
 	EndIf
 
 	;CALCULATE WHICH TIMER TO USE
@@ -246,14 +257,12 @@ Func GoldElixirChangeEBO()
 			$Gold2 = getGoldVillageSearch(48, 69 + 7)
 		EndIf
 		$Elixir2 = getElixirVillageSearch(48, 69 + 29 + 7)
-		$Trophies = getTrophyVillageSearch(48, 69 + 99 + 7)
 		CheckHeroesHealth()
-		If $Trophies <> "" Then ; If trophy value found, then base has Dark Elixir
+		If _CheckPixel($aAtkHasDarkElixir, $g_bCapturePixel, Default, "HasDarkElixir2") Then ; dark elixir drop icon, the trophy line is gone since CoC 18.600
 			If _Sleep($DELAYGOLDELIXIRCHANGEEBO1) Then Return
 			$DarkElixir2 = getDarkElixirVillageSearch(48, 69 + 57 + 7)
 		Else
 			$DarkElixir2 = ""
-			$Trophies = getTrophyVillageSearch(48, 69 + 69 + 7)
 		EndIf
 		$CurDamage = getOcrOverAllDamage(780, 527 + $g_iBottomOffsetY)
 		;--> Read Ressources #2
@@ -289,15 +298,15 @@ Func GoldElixirChangeEBO()
 
 		If Number($CurDamage) >= 92 Then
 
-			If $g_iKingSlot >= 11 Or $g_iQueenSlot >= 11 Or $g_iPrinceSlot >= 11 Or $g_iWardenSlot >= 11 Or $g_iChampionSlot >= 11 Then
+			If $g_iKingSlot >= 11 Or $g_iQueenSlot >= 11 Or $g_iPrinceSlot >= 11 Or $g_iWardenSlot >= 11 Or $g_iChampionSlot >= 11 Or $g_iDukeSlot >= 11 Then
 				If Not $g_bDraggedAttackBar Then DragAttackBar($g_iTotalAttackSlot, False) ; drag forward
 			Else
-				If $g_iKingSlot >= 0 Or $g_iQueenSlot >= 0 Or $g_iPrinceSlot >= 0 Or $g_iWardenSlot >= 0 Or $g_iChampionSlot >= 0 Then
+				If $g_iKingSlot >= 0 Or $g_iQueenSlot >= 0 Or $g_iPrinceSlot >= 0 Or $g_iWardenSlot >= 0 Or $g_iChampionSlot >= 0 Or $g_iDukeSlot >= 0 Then
 					If $g_bDraggedAttackBar Then DragAttackBar($g_iTotalAttackSlot, True) ; return drag
 				EndIf
 			EndIf
 
-			If ($g_bCheckKingPower Or $g_bCheckQueenPower Or $g_bCheckPrincePower Or $g_bCheckWardenPower Or $g_bCheckChampionPower) Then
+			If ($g_bCheckKingPower Or $g_bCheckQueenPower Or $g_bCheckPrincePower Or $g_bCheckWardenPower Or $g_bCheckChampionPower Or $g_bCheckDukePower) Then
 				If $g_bCheckKingPower And $g_iActivateKing = 0 Then
 					SetLog("Activating King's ability to restore some health before leaving with a 3 Star", $COLOR_INFO)
 					If IsAttackPage() Then SelectDropTroop($g_iKingSlot) ;If King was not activated: Boost King before Battle ends with a 3 Star
@@ -322,6 +331,11 @@ Func GoldElixirChangeEBO()
 					SetLog("Activating Royal Champion's ability to restore some health before leaving with a 3 Star", $COLOR_INFO)
 					If IsAttackPage() Then SelectDropTroop($g_iChampionSlot) ;If Champion was not activated: Boost Champion before Battle ends with a 3 Star
 					$g_bCheckChampionPower = False
+				EndIf
+				If $g_bCheckDukePower And $g_iActivateDuke = 0 Then
+					SetLog("Activating Dragon Duke's ability to restore some health before leaving with a 3 Star", $COLOR_INFO)
+					If IsAttackPage() Then SelectDropTroop($g_iDukeSlot) ;If Duke was not activated: Boost Duke before Battle ends with a 3 Star
+					$g_bCheckDukePower = False
 				EndIf
 			EndIf
 		EndIf

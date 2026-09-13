@@ -1,0 +1,7 @@
+Village > Notify: "Test" buttons next to the Telegram token and the Discord webhook, with a clear verdict (bad token, nobody wrote to the bot yet, deleted webhook...).
+Discord webhook field accepts the full URL or just its "id/token" end.
+Treasury: the chest button is matched by its full colour signature and every candidate is tried until the window opens; the log now says why the loot was or was not collected.
+The bot keeps a screenshot in Profiles\<profile>\Temp\Debug whenever it cannot find a button or recognise a window (Next, Okay, Treasury, Request...), capped and purged after 7 days.
+Stats tab shows the league badge and tier; AttackLog gets a TIER column and a league code; attack report logs "League: Valkyrie 13".
+Debug log about 3x smaller: the repeated pixel dumps of the dimmed-screen check are gone (and 9 screen captures per check with them).
+LISEZMOI (readme) with requirements, setup, notifications and troubleshooting included in the zip.

@@ -62,6 +62,7 @@ Func _SetLog($sLogMessage, $Color = Default, $Font = Default, $FontSize = Defaul
 
 	; write to log file
 	If $bWriteToLogFile Then __FileWriteLog($g_hLogFile, $log)
+	If $LogPrefix = "L " And $g_bNotifyDiscordFullLog Then NotifyDiscordLogAdd($time, $sLogMessage) ; full log to Discord option, batched
 	If $bSilentSetLog = True And ($bWriteToLogFile = False Or $g_hLogFile) Then
 		; Silent mode is active, only write to log file, not to log control
 		Return
@@ -340,7 +341,7 @@ EndFunc   ;==>SetSwitchAccLog
 Func AtkLogHead()
 	SetAtkLog(_PadStringCenter(" " & GetTranslatedFileIni("MBR Func_AtkLogHead", "AtkLogHead_Text_01", "ATTACK LOG") & " ", 71, "="), "", $COLOR_BLACK, "MS Shell Dlg", 8.5)
 	SetAtkLog(GetTranslatedFileIni("MBR Func_AtkLogHead", "AtkLogHead_Text_02", '|                       ------- LOOT --------            -- BONUS --   |'), "")
-	SetAtkLog(GetTranslatedFileIni("MBR Func_AtkLogHead", "AtkLogHead_Text_03", '|AC| TIME|TROPHY|SRC|DS|   GOLD| ELIXIR|   DE| TR| *|  %| G & E|  DE|L.|'), "")
+	SetAtkLog(GetTranslatedFileIni("MBR Func_AtkLogHead", "AtkLogHead_Text_03", '|AC| TIME|  TIER|SRC|DS|   GOLD| ELIXIR|   DE| TR| *|  %| G & E|  DE|L.|'), "")
 EndFunc   ;==>AtkLogHead
 
 Func __FileWriteLog($handle, $text)

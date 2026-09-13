@@ -1698,6 +1698,19 @@ Func SkipCraftStart($b_ResType = "Gold", $cost = 0, $iCurrentGold = 0, $iCurrent
 		EndIf
 	EndIf
 
+	;   Is Duke Level updated |          Is Duke not max yet          |    Is Upgrade enabled   |               Is Duke not already upgrading
+	If ($g_iDukeLevel <> -1) And ($g_iDukeLevel < $g_iMaxDukeLevel) And $g_bUpgradeDukeEnable And BitAND($g_iHeroUpgradingBit, $eHeroDuke) <> $eHeroDuke Then
+		Local $DukeFinalCost = ($g_afDukeUpgCost[$g_iDukeLevel] * 1000) - (($g_afDukeUpgCost[$g_iDukeLevel] * 1000) * Number($g_iBuilderBoostDiscount) / 100)
+		Local $bMinDukeDarkElixir = Number($iCurrentDE) > ($cost + $DukeFinalCost + Number($g_iacmdDarkSaveMin))
+		If Not $bMinDukeDarkElixir Then
+			If $b_ResType = "Dark Elixir" Then
+				SetLog("Dragon Duke needs " & _NumberFormat($DukeFinalCost, True) & " Dark Elixir for next Level", $COLOR_WARNING)
+				SetLog("Skipping", $COLOR_WARNING)
+				Return True
+			EndIf
+		EndIf
+	EndIf
+
 	;;;;;;;;;;;;;;;;;;;;;;;;;;;##### Verify the Upgrade troop kind in Laboratory , if is elixir/Dark elixir Spell/Troop , the Lab have priority #####;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 	Local $bMinCraftElixir = Number($iCurrentElix) > ($cost + Number($g_iLaboratoryElixirCost) + Number($g_iacmdElixSaveMin)) ; Check if enough Elixir
 	If $g_bAutoLabUpgradeEnable And $g_iLaboratoryElixirCost > 0 And Not $bMinCraftElixir Then

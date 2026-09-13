@@ -815,3 +815,33 @@ Func UpdateStats_ClearArray(ByRef $a)
 		$a[$i] = 0
 	Next
 EndFunc   ;==>UpdateStats_ClearArray
+
+; Stats tab league badge for the CoC 18.600 tiers: the old league icons stand in for the tier groups
+; (Skeleton-Archer 1-9 bronze, Wizard silver, Valkyrie gold, Witch crystal, Golem master, P.E.K.K.A
+; champion, Titan-Electro titan, Legend legend) and the small label below shows the tier number.
+Func UpdateLeagueDisplay($iTier)
+	If $g_hLblLeague = 0 Then Return ; Mini GUI has no league badge
+	$iTier = Number($iTier)
+	Local $iIcon = $eLeagueUnranked
+	If $iTier >= 34 Then
+		$iIcon = $eLeagueLegend
+	ElseIf $iTier >= 25 Then
+		$iIcon = $eLeagueTitan
+	ElseIf $iTier >= 22 Then
+		$iIcon = $eLeagueChampion
+	ElseIf $iTier >= 19 Then
+		$iIcon = $eLeagueMaster
+	ElseIf $iTier >= 16 Then
+		$iIcon = $eLeagueCrystal
+	ElseIf $iTier >= 13 Then
+		$iIcon = $eLeagueGold
+	ElseIf $iTier >= 10 Then
+		$iIcon = $eLeagueSilver
+	ElseIf $iTier >= 1 Then
+		$iIcon = $eLeagueBronze
+	EndIf
+	_GUI_Value_STATE("HIDE", $g_aGroupLeague)
+	GUICtrlSetState($g_ahPicLeague[$iIcon], $GUI_SHOW)
+	GUICtrlSetData($g_hLblLeague, ($iTier >= 1 ? String($iTier) : ""))
+	_GUICtrlSetTip($g_ahPicLeague[$iIcon], LeagueTierName($iTier))
+EndFunc   ;==>UpdateLeagueDisplay

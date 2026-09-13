@@ -1,3 +1,38 @@
+* v10.3.3 **
+* Language check at start: when the OCR reads nothing on the Attack button, the white pixels of the label are compared to the English "Attack!" word (pixel match) before the game is declared not in English; the bot no longer stops on an OCR miss.
+
+* v10.3.2 **
+* Stats tab: the league badge shows the last tier read (saved in the profile) as soon as the bot opens, and follows the badge in search mode, instead of staying "Unranked" until the first Village Report.
+
+* v10.3.1 **
+* Language check at start: the "Attack!" button is read up to three times, clearing the screen in between, before the game is declared not in English (a popup at start made the bot stop with "Language setting is Wrong").
+
+* v10.3.0 **
+* Discord: the last raid is posted as a card (embed) with gold / elixir / dark elixir, stars, destruction %, league and bonus, coloured by the number of stars, with the raid screenshot attached when "Last raid as image" is on.
+* Discord: new "Full log to Discord" option (Village > Notify): every line of the bot log is posted to the webhook as code blocks, in batches every 20 seconds, without making the bot wait for discord.com.
+* Telegram: the last raid text shows the league name ("Valkyrie 13") instead of the old trophy count.
+
+* v10.2.0 **
+* Village > Notify: "Test" buttons next to the Telegram token and the Discord webhook, with a clear verdict (bad token, nobody wrote to the bot yet, deleted webhook...).
+* Discord webhook field accepts the full URL or just its "id/token" end.
+* Treasury: the chest button is matched by its full colour signature and every candidate is tried until the window opens; the log now says why the loot was or was not collected.
+* The bot keeps a screenshot in Profiles\<profile>\Temp\Debug whenever it cannot find a button or recognise a window (Next, Okay, Treasury, Request...), capped and purged after 7 days.
+* Stats tab shows the league badge and tier; AttackLog gets a TIER column and a league code; attack report logs "League: Valkyrie 13".
+* Debug log about 3x smaller: the repeated pixel dumps of the dimmed-screen check are gone (and 9 screen captures per check with them).
+* LISEZMOI (readme) with requirements, setup, notifications and troubleshooting included in the zip.
+
+* v10.1.0 **
+* League tiers (CoC 18.600): the bot reads the tier number (1-36) on the league badge with its own digit recognizer; Village Report and search log show "Valkyrie 13" style names.
+* Every setting that still compared against trophy counts now uses league tiers: search filters (1-36), Legend league detection, cloud wait, Clan Games challenges.
+* "Trophy Settings" tab replaced by a "League" tab with a single "Max. league tier"; "Max.Trophy" bot conditions renamed "Max.League". Old profile values above 36 are clamped automatically.
+* Treasury: the Treasury button of the Clan Castle bar is found by colour (the old template no longer matched), full bars detected by green dominance.
+* Star Bonus and "upgrades finished while you were away" popups are closed automatically (green Okay button found by colour).
+* Battle reward cards (33% / 77%) are picked and their gold/elixir counted in the loot stats.
+* Discord notifications: webhook option mirroring Telegram (same messages, files and alerts), new Notify tab icons.
+* Dragon Duke added to the hero settings; hero level caps and TH18 tables refreshed from the game files.
+* Fixed the crash when hiding shields (array overflow) and the "Monkey needs more bananas" shield reading error.
+* Next button found again on the village search screen.
+
 * v8.2.0 **
 * Excluded TH7- from HiddenSlotstatus().
 * Added support for BB Defensive Layout obstructed window.

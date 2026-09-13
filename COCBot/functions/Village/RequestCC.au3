@@ -63,22 +63,35 @@ Func RequestCC($bClickPAtEnd = True, $sText = "")
 	Local Static $aRequestButtonPos[2] = [-1, -1]
 
 	Local $aRequestButton = findMultiple($g_sImgRequestCCButton, $sSearchDiamond, $sSearchDiamond, 0, 1000, 1, "objectname,objectpoints", True)
-	If Not IsArray($aRequestButton) Then
-		SetLog("Error in RequestCC(): $aRequestButton is no Array")
-		If $g_bDebugImageSave Then SaveDebugImage("RequestButtonStateError")
-		If Not $bClickPAtEnd Then CloseWindow2()
-		Return
-	EndIf
-
-	If Not $g_bRunState Then Return
-
-	If UBound($aRequestButton, 1) >= 1 Then
-		Local $sButtonState
+	Local $sButtonState = ""
+	If IsArray($aRequestButton) And UBound($aRequestButton, 1) >= 1 Then
 		Local $aRequestButtonSubResult = $aRequestButton[0]
 		$sButtonState = $aRequestButtonSubResult[0]
 		If $aRequestButtonPos[0] = -1 Then
 			$aRequestButtonPos = StringSplit($aRequestButtonSubResult[1], ",", $STR_NOCOUNT)
 		EndIf
+	Else
+		; The templates predate the CoC 18.600 army window. The button keeps a fixed place at the
+		; bottom right of the clan castle row, green (0xB4E67D measured) while a request can be
+		; made and grey once one is pending or the castle is full, so its edges tell the state.
+		_CaptureRegion()
+		Local $bGreen = True
+		Local $aiProbeX[2] = [746, 786]
+		For $x In $aiProbeX
+			Local $sCol = _GetPixelColor($x, 468 + $g_iMidOffsetY, False)
+			If StringLen($sCol) <> 6 Then ContinueLoop
+			Local $iR = Dec(StringMid($sCol, 1, 2)), $iG = Dec(StringMid($sCol, 3, 2)), $iB = Dec(StringMid($sCol, 5, 2))
+			If Not ($iG >= 190 And $iG > $iR + 20 And $iB < 170) Then $bGreen = False
+		Next
+		$sButtonState = ($bGreen ? "Available" : "Already")
+		$aRequestButtonPos[0] = 766
+		$aRequestButtonPos[1] = 468 + $g_iMidOffsetY
+		SetDebugLog("RequestCC: button state read by colour: " & $sButtonState, $COLOR_DEBUG)
+	EndIf
+
+	If Not $g_bRunState Then Return
+
+	If $sButtonState <> "" Then
 
 		If StringInStr($sButtonState, "Available", 0) > 0 Then
 			Local $bNeedRequest = False
@@ -127,7 +140,16 @@ Func _makerequest($aRequestButtonPos)
 	isGemOpen(True)
 	If _Sleep(500) Then Return
 
-	If Not IsWindowOpen($g_sImgSendRequestButton, 20, 100, $sSendButtonArea) Then
+	Local $bSendFound = IsWindowOpen($g_sImgSendRequestButton, 20, 100, $sSendButtonArea)
+	If Not $bSendFound Then
+		; the green Send button of the CoC 18.600 dialog (455-635 x 440-515 measured) is found by colour
+		Local $aSend = FindGreenOkayButton()
+		If IsArray($aSend) Then
+			$g_avWindowCoordinates = $aSend
+			$bSendFound = True
+		EndIf
+	EndIf
+	If Not $bSendFound Then
 		SetLog("Request has already been made, or request window not available", $COLOR_INFO)
 		If _Sleep($DELAYMAKEREQUEST2) Then Return
 	Else
@@ -145,8 +167,13 @@ Func _makerequest($aRequestButtonPos)
 		If _Sleep($DELAYMAKEREQUEST2) Then Return ; wait time for text request to complete
 
 		If Not IsWindowOpen($g_sImgSendRequestButton, 20, 100, $sSendButtonArea) Then
-			SetDebugLog("Send request button not found", $COLOR_DEBUG)
-			CheckMainScreen(False) ;emergency exit
+			Local $aSend2 = FindGreenOkayButton()
+			If IsArray($aSend2) Then
+				$g_avWindowCoordinates = $aSend2
+			Else
+				SetDebugLog("Send request button not found", $COLOR_DEBUG)
+				CheckMainScreen(False) ;emergency exit
+			EndIf
 		EndIf
 
 		If Not $g_bChkBackgroundMode And Not $g_bNoFocusTampering Then ControlFocus($g_hAndroidWindow, "", "") ; make sure Android has window focus
@@ -385,6 +412,7 @@ Func RemoveCastleArmy($aToRemove)
 	; Click 'Edit Army'
 	If Not _CheckPixel($aButtonEditArmy, True) Then ; If no 'Edit Army' Button found in army tab to edit troops
 		SetLog("Cannot find/verify 'Edit Army' Button in Army tab", $COLOR_WARNING)
+		SaveFailureImage("RequestEditArmy")
 		Return False ; Exit function
 	EndIf
 
@@ -446,6 +474,7 @@ Func RemoveCastleArmy($aToRemove)
 		$counter += 1
 		If $counter <= 5 Then ContinueLoop
 		SetLog("Cannot find/verify 'Okay' Button in Army tab", $COLOR_WARNING)
+		SaveFailureImage("RequestOkay")
 		ClickAway()
 		If _Sleep(400) Then OpenArmyOverview(True, "RemoveCastleSpell()") ; Open Army Window AGAIN
 		Return False ; Exit Function

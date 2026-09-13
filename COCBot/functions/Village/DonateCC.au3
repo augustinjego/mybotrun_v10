@@ -190,7 +190,7 @@ Func DonateCC($bUpdateStats = True)
 
 	If _Sleep(1000) Then Return
 
-	If Not ClickB("ClanChat") Then
+	If Not ClickClanChatTab() Then
 		SetLog("Error finding the Clan Tab Button", $COLOR_ERROR)
 		Return
 	EndIf
@@ -760,11 +760,11 @@ Func DonateCC($bUpdateStats = True)
 		$bDonate = False
 	WEnd
 
-	If Not ClickB("ClanChat") Then
+	If Not ClickClanChatTab() Then
 		If _Sleep(1000) Then Return
 		ClickAway("Right")
 		If _Sleep(1000) Then Return
-		If Not ClickB("ClanChat") Then
+		If Not ClickClanChatTab() Then
 			SetLog("Error finding the Clan Tab Button", $COLOR_ERROR)
 			AndroidPageError("DonateCC")
 		EndIf

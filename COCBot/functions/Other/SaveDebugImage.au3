@@ -66,6 +66,31 @@ Func SaveDebugImage($sImageName = "Unknown", $vCaptureNew = Default, $bCreateSub
 	If _Sleep($DELAYDEBUGIMAGESAVE1) Then Return
 EndFunc   ;==>SaveDebugImage
 
+; Keeps a screenshot of the screen the bot did not understand (button not found, window not
+; recognised...) in Profiles\<profile>\Temp\Debug\<name>\, whatever the debug settings, so the
+; failure can be diagnosed from the log folder afterwards. Capped at 30 shots per name and per
+; session, and shots older than 7 days are purged on the first call of the session.
+Func SaveFailureImage($sName)
+	Local Static $bPurged = False
+	Local Static $sCounts = "|"
+	If Not $bPurged Then
+		$bPurged = True
+		If $g_sProfileTempDebugPath <> "" And FileExists($g_sProfileTempDebugPath) Then Deletefiles($g_sProfileTempDebugPath, "*.png", 7, 0, $FLTAR_RECUR)
+	EndIf
+	Local $iCount = 0
+	Local $a = StringRegExp($sCounts, "\|" & $sName & "=(\d+)\|", $STR_REGEXPARRAYMATCH)
+	If IsArray($a) Then $iCount = Number($a[0])
+	If $iCount >= 30 Then Return
+	$iCount += 1
+	If IsArray($a) Then
+		$sCounts = StringReplace($sCounts, "|" & $sName & "=" & $a[0] & "|", "|" & $sName & "=" & $iCount & "|")
+	Else
+		$sCounts &= $sName & "=1|"
+	EndIf
+	SaveDebugImage($sName)
+	SetLog("Screenshot kept in Temp\Debug\" & $sName & " for diagnosis", $COLOR_INFO)
+EndFunc   ;==>SaveFailureImage
+
 Func SaveSCIDebugImage($sImageName = "Unknown", $vCaptureNew = Default, $bCreateSubFolder = Default, $sTag = "")
 
 	If $vCaptureNew = Default Then $vCaptureNew = True

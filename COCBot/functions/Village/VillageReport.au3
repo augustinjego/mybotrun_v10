@@ -30,8 +30,10 @@ Func VillageReport($bBypass = False, $bSuppressLog = False)
 	getBuilderCount($bSuppressLog) ; update builder data
 	If _Sleep($DELAYRESPOND) Then Return
 
-	$g_aiCurrentLoot[$eLootTrophy] = getTrophyMainScreen($aTrophies[0], $aTrophies[1])
-	If Not $bSuppressLog Then SetLog(" [T]: " & _NumberFormat($g_aiCurrentLoot[$eLootTrophy]), $COLOR_SUCCESS)
+	; trophies are gone since CoC 18.600, the slot now carries the league tier read on the badge
+	$g_aiCurrentLoot[$eLootTrophy] = getLeagueTier($aLeagueTierMain)
+	If Not $bSuppressLog Then SetLog(" [League]: " & LeagueTierName($g_aiCurrentLoot[$eLootTrophy]), $COLOR_SUCCESS)
+	UpdateLeagueDisplay($g_aiCurrentLoot[$eLootTrophy])
 
 	If _CheckPixel($aVillageHasDarkElixir, $g_bCapturePixel) Then ; check if the village have a Dark Elixir Storage
 		$g_aiCurrentLoot[$eLootGold] = getResourcesMainScreen(696, 23)

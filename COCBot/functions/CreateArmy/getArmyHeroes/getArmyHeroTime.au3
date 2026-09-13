@@ -25,7 +25,7 @@ Func getArmyHeroTime($iHeroType, $bOpenArmyWindow = False, $bCloseArmyWindow = F
 	$g_asHeroHealTime[3] = ""
 
 	; validate hero troop type input, must be hero enum value or "all"
-	If $iHeroType <> $eHeroKing And $iHeroType <> $eHeroQueen And $iHeroType <> $eHeroPrince And $iHeroType <> $eHeroWarden And $iHeroType <> $eHeroChampion And StringInStr($iHeroType, "all", $STR_NOCASESENSEBASIC) = 0 Then
+	If $iHeroType <> $eHeroKing And $iHeroType <> $eHeroQueen And $iHeroType <> $eHeroPrince And $iHeroType <> $eHeroWarden And $iHeroType <> $eHeroChampion And $iHeroType <> $eHeroDuke And StringInStr($iHeroType, "all", $STR_NOCASESENSEBASIC) = 0 Then
 		SetLog("getHeroTime slipped on banana, get doctor, tell him: " & $iHeroType, $COLOR_ERROR)
 		SetError(1)
 		Return
@@ -48,7 +48,7 @@ Func getArmyHeroTime($iHeroType, $bOpenArmyWindow = False, $bCloseArmyWindow = F
 
 	Return
 
-	Local $HeroSlotsInfos[5][2] = [["King", $eHeroKing], ["Queen", $eHeroQueen], ["Prince", $eHeroPrince], ["Warden", $eHeroWarden], ["Champion", $eHeroChampion]]
+	Local $HeroSlotsInfos[6][2] = [["King", $eHeroKing], ["Queen", $eHeroQueen], ["Prince", $eHeroPrince], ["Warden", $eHeroWarden], ["Champion", $eHeroChampion], ["Duke", $eHeroDuke]]
 
 	; Constant Array with OCR find location: [X pos, Y Pos, Text Name, Global enum value]
 	Local Const $aHeroRemainData[$eHeroSlots][4] = [[530, 380 + $g_iMidOffsetY, $HeroSlotsInfos[$g_aiCmbCustomHeroOrder[0]][0], $HeroSlotsInfos[$g_aiCmbCustomHeroOrder[0]][1]], _
@@ -116,7 +116,7 @@ Func getArmyHeroTime($iHeroType, $bOpenArmyWindow = False, $bCloseArmyWindow = F
 	EndIf
 
 	; Determine proper return value
-	If $iHeroType = $eHeroKing Or $iHeroType = $eHeroQueen Or $iHeroType = $eHeroPrince Or $iHeroType = $eHeroWarden Or $iHeroType = $eHeroChampion Then
+	If $iHeroType = $eHeroKing Or $iHeroType = $eHeroQueen Or $iHeroType = $eHeroPrince Or $iHeroType = $eHeroWarden Or $iHeroType = $eHeroChampion Or $iHeroType = $eHeroDuke Then
 		Return $iRemainTrainHeroTimer ; return one requested hero value
 	ElseIf StringInStr($iHeroType, "all", $STR_NOCASESENSEBASIC) > 0 Then
 		; Set Time Array for PickupHealedHeroes

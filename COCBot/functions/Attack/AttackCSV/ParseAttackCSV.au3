@@ -479,12 +479,11 @@ Func ParseAttackCSV($debug = False)
 							$Gold = getGoldVillageSearch(48, 69 + 7)
 							$Elixir = getElixirVillageSearch(48, 69 + 29 + 7)
 							If _Sleep($DELAYRESPOND) Then Return ; check for pause/stop
-							$Trophies = getTrophyVillageSearch(48, 69 + 99 + 7)
-							If $Trophies <> "" Then ; If trophy value found, then base has Dark Elixir
+							$Trophies = "" ; gone since CoC 18.600, the dark elixir row is found by its drop icon instead
+							If _CheckPixel($aAtkHasDarkElixir, $g_bCapturePixel, Default, "HasDarkElixirCSV") Then
 								$DarkElixir = getDarkElixirVillageSearch(48, 69 + 57 + 7)
 							Else
 								$DarkElixir = ""
-								$Trophies = getTrophyVillageSearch(48, 69 + 69 + 7)
 							EndIf
 							If $bBreakOn50Percent And Number($Damage) > 49 Then ContinueLoop 2
 							CheckHeroesHealth()

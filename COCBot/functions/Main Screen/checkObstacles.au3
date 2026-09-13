@@ -148,7 +148,7 @@ Func _checkObstacles($bBuilderBase = False, $bRecursive = False) ;Checks if some
 			EndIf
 		EndIf
 		SetLog("Maintenance Break, waiting: " & $iMaintenanceWaitTime / 60000 & " minutes", $COLOR_ERROR)
-		If $g_bNotifyTGEnable And $g_bNotifyAlertMaintenance = True Then NotifyPushToTelegram("Maintenance Break, waiting: " & $iMaintenanceWaitTime / 60000 & " minutes....")
+		If NotifyEnabled() And $g_bNotifyAlertMaintenance = True Then NotifyPushToTelegram("Maintenance Break, waiting: " & $iMaintenanceWaitTime / 60000 & " minutes....")
 		If _SleepStatus($iMaintenanceWaitTime) Then Return
 		If ClickB("ReloadButton") Then SetLog("Trying to reload game after maintenance break", $COLOR_INFO)
 		checkObstacles_ResetSearch()
@@ -262,11 +262,23 @@ Func _checkObstacles($bBuilderBase = False, $bRecursive = False) ;Checks if some
 			If _Sleep($DELAYCHECKOBSTACLES1) Then Return
 			Return False
 		EndIf
+		; The Okay templates miss the redrawn CoC 18.600.5 button, which left windows such as
+		; "upgrades finished while you were away" open until the bot gave up and restarted CoC.
+		; Find the green button by its colours instead, wherever the window puts it.
+		Local $aGreenOkay = FindGreenOkayButton()
+		If IsArray($aGreenOkay) Then
+			SetLog("Closing window with its Okay button", $COLOR_INFO)
+			ClickP($aGreenOkay)
+			$g_bMinorObstacle = True
+			If _Sleep($DELAYCHECKOBSTACLES1) Then Return
+			Return False
+		EndIf
 		Local $aConfirmButton = findButton("ConfirmButton", Default, 1, True)
 		If IsArray($aConfirmButton) And UBound($aConfirmButton) = 2 Then
 			ClickP($aConfirmButton)
 			If _Sleep($DELAYCHECKOBSTACLES1) Then Return
 		Else
+			SaveFailureImage("UnknownWindow") ; no Okay/Confirm button matched on this dimmed screen
 			ClickAway() ; Click away If things are open
 			If _Sleep($DELAYCHECKOBSTACLES1) Then Return
 		EndIf
@@ -329,6 +341,13 @@ Func _checkObstacles($bBuilderBase = False, $bRecursive = False) ;Checks if some
 			SetLog("Congrats Chief, Stars Bonus Awarded", $COLOR_INFO)
 			Click($g_iQuickMISX, $g_iQuickMISY)
 			If _Sleep(2000) Then Return
+			$g_bMinorObstacle = True
+			Return False
+		EndIf
+		; Home village "Star Bonus received!" window, identified by its own colours (the generic
+		; Okay search below does not always match the CoC 18.600.5 button)
+		If StarBonus() Then
+			SetLog("Star Bonus window closed chief!", $COLOR_INFO)
 			$g_bMinorObstacle = True
 			Return False
 		EndIf
@@ -469,7 +488,7 @@ EndFunc   ;==>checkObstacles_RebootAndroid
 Func checkObstacles_StopBot($msg)
 	SetLog($msg, $COLOR_ERROR)
 	If TestCapture() Then Return $msg
-	If $g_bNotifyTGEnable And $g_bNotifyAlertMaintenance Then NotifyPushToTelegram($msg)
+	If NotifyEnabled() And $g_bNotifyAlertMaintenance Then NotifyPushToTelegram($msg)
 	OcrForceCaptureRegion(True)
 	Btnstop() ; stop bot
 	Return True
@@ -700,6 +719,7 @@ Func CheckAllObstacles($bDebugImageSave = $g_bDebugImageSave, $MinType = 0, $Max
 
 			If $i = 3 Then
 				SetLog("Warning: Cannot find type of Reload error message", $COLOR_ERROR)
+				SaveFailureImage("ReloadError")
 				If $bDebugImageSave Then SaveDebugImage("CheckObstacles")
 				checkObstacles_ReloadCoC($bRecursive)
 				$bRet = True
@@ -744,45 +764,35 @@ Func CheckDailyRewardWindow()
 	CloseWindow2()
 EndFunc   ;==>CheckDailyRewardWindow
 
+; The three shades of the top-left "builder info" button when a window dims the village. The probe
+; pixels are logged once per call from the last 20x2 px capture (they used to be re-captured nine
+; times and logged three times per call, which made up most of the log file).
+; The three shades of the top-left "builder info" button when a window dims the village. The probe
+; pixels are logged once per call from the last 20x2 px capture (they used to be re-captured nine
+; times and logged three times per call, which made up most of the log file).
 Func IsMainGrayed()
 
 	Local $offColors1[2][3] = [[0x3D5F72, 4, 0], [0x7B7B77, 9, 0]] ; 2nd light blue pixel, 3rd white pixel
-	Local $IsMainGrayed1 = _MultiPixelSearch(370, 7, 390, 9, 1, 1, Hex(0x576F7B, 6), $offColors1, 15) ; first light blue pixel on left of button
-	SetDebugLog("Main 1 Pixel Color #1: " & _GetPixelColor(374, 8, True) & ", #2: " & _GetPixelColor(378, 8, True) & ", #3: " & _GetPixelColor(383, 8, True), $COLOR_DEBUG)
-	If IsArray($IsMainGrayed1) Then Return True
-
-	Local $offColors2[2][3] = [[0x253944, 4, 0], [0x4A4A47, 9, 0]] ; 2nd light blue pixel, 3rd white pixel
-	Local $IsMainGrayed2 = _MultiPixelSearch(370, 7, 390, 9, 1, 1, Hex(0x34434A, 6), $offColors2, 15) ; first light blue pixel on left of button
-	SetDebugLog("Main 2 Pixel Color #1: " & _GetPixelColor(374, 8, True) & ", #2: " & _GetPixelColor(378, 8, True) & ", #3: " & _GetPixelColor(383, 8, True), $COLOR_DEBUG)
-	If IsArray($IsMainGrayed2) Then Return True
-
-	Local $offColors3[2][3] = [[0x497188, 4, 0], [0x93938E, 9, 0]] ; 2nd light blue pixel, 3rd white pixel
-	Local $IsMainGrayed3 = _MultiPixelSearch(370, 7, 390, 9, 1, 1, Hex(0x688593, 6), $offColors3, 15) ; first light blue pixel on left of button
-	SetDebugLog("Main 3 Pixel Color #1: " & _GetPixelColor(374, 8, True) & ", #2: " & _GetPixelColor(378, 8, True) & ", #3: " & _GetPixelColor(383, 8, True), $COLOR_DEBUG)
-	If IsArray($IsMainGrayed3) Then Return True
-
-	Return False
+	Local $offColors2[2][3] = [[0x253944, 4, 0], [0x4A4A47, 9, 0]]
+	Local $offColors3[2][3] = [[0x497188, 4, 0], [0x93938E, 9, 0]]
+	Local $bGrayed = IsArray(_MultiPixelSearch(370, 7, 390, 9, 1, 1, Hex(0x576F7B, 6), $offColors1, 15)) ; first light blue pixel on left of button
+	If Not $bGrayed Then $bGrayed = IsArray(_MultiPixelSearch(370, 7, 390, 9, 1, 1, Hex(0x34434A, 6), $offColors2, 15))
+	If Not $bGrayed Then $bGrayed = IsArray(_MultiPixelSearch(370, 7, 390, 9, 1, 1, Hex(0x688593, 6), $offColors3, 15))
+	SetDebugLog("Main grayed: " & ($bGrayed ? "yes" : "no") & " (374,8=" & _GetPixelColor(4, 1) & " 378,8=" & _GetPixelColor(8, 1) & " 383,8=" & _GetPixelColor(13, 1) & ")", $COLOR_DEBUG)
+	Return $bGrayed
 
 EndFunc   ;==>IsMainGrayed
 
 Func IsBuilderBaseGrayed()
 
 	Local $offColors1[3][3] = [[0x3D5F72, 4, 0], [0x070707, 6, 0], [0x7B7B77, 8, 0]] ; 2nd light blue pixel, 3rd pixel Black, 4th pixel White
-	Local $IsBuilderBaseGrayed1 = _MultiPixelSearch(440, 7, 465, 9, 1, 1, Hex(0x576F7B, 6), $offColors1, 15) ; first light blue pixel on left of button
-	SetDebugLog("BB 1 Pixel Color #1: " & _GetPixelColor(451, 8, True) & ", #2: " & _GetPixelColor(455, 8, True) & ", #3: " & _GetPixelColor(457, 8, True) & ", #4: " & _GetPixelColor(459, 8, True), $COLOR_DEBUG)
-	If IsArray($IsBuilderBaseGrayed1) Then Return True
-
-	Local $offColors2[3][3] = [[0x253944, 4, 0], [0x040404, 6, 0], [0x4A4A47, 8, 0]] ; 2nd light blue pixel, 3rd pixel Black, 4th pixel White
-	Local $IsBuilderBaseGrayed2 = _MultiPixelSearch(440, 7, 465, 9, 1, 1, Hex(0x34434A, 6), $offColors2, 15) ; first light blue pixel on left of button
-	SetDebugLog("BB 2 Pixel Color #1: " & _GetPixelColor(451, 8, True) & ", #2: " & _GetPixelColor(455, 8, True) & ", #3: " & _GetPixelColor(457, 8, True) & ", #4: " & _GetPixelColor(459, 8, True), $COLOR_DEBUG)
-	If IsArray($IsBuilderBaseGrayed2) Then Return True
-
-	Local $offColors3[3][3] = [[0x497188, 4, 0], [0x080808, 6, 0], [0x93938E, 8, 0]] ; 2nd light blue pixel, 3rd pixel Black, 4th pixel White
-	Local $IsBuilderBaseGrayed3 = _MultiPixelSearch(440, 7, 465, 9, 1, 1, Hex(0x688593, 6), $offColors3, 15) ; first light blue pixel on left of button
-	SetDebugLog("BB 3 Pixel Color #1: " & _GetPixelColor(451, 8, True) & ", #2: " & _GetPixelColor(455, 8, True) & ", #3: " & _GetPixelColor(457, 8, True) & ", #4: " & _GetPixelColor(459, 8, True), $COLOR_DEBUG)
-	If IsArray($IsBuilderBaseGrayed3) Then Return True
-
-	Return False
+	Local $offColors2[3][3] = [[0x253944, 4, 0], [0x040404, 6, 0], [0x4A4A47, 8, 0]]
+	Local $offColors3[3][3] = [[0x497188, 4, 0], [0x080808, 6, 0], [0x93938E, 8, 0]]
+	Local $bGrayed = IsArray(_MultiPixelSearch(440, 7, 465, 9, 1, 1, Hex(0x576F7B, 6), $offColors1, 15)) ; first light blue pixel on left of button
+	If Not $bGrayed Then $bGrayed = IsArray(_MultiPixelSearch(440, 7, 465, 9, 1, 1, Hex(0x34434A, 6), $offColors2, 15))
+	If Not $bGrayed Then $bGrayed = IsArray(_MultiPixelSearch(440, 7, 465, 9, 1, 1, Hex(0x688593, 6), $offColors3, 15))
+	SetDebugLog("BB grayed: " & ($bGrayed ? "yes" : "no") & " (451,8=" & _GetPixelColor(11, 1) & " 455,8=" & _GetPixelColor(15, 1) & " 457,8=" & _GetPixelColor(17, 1) & " 459,8=" & _GetPixelColor(19, 1) & ")", $COLOR_DEBUG)
+	Return $bGrayed
 
 EndFunc   ;==>IsBuilderBaseGrayed
 

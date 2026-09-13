@@ -31,12 +31,22 @@ Func getArmyHeroCount($bOpenArmyWindow = False, $bCloseArmyWindow = False, $Chec
 		EndIf
 	EndIf
 
-	Local $HeroSlotsInfos[5] = [$eHeroKing, $eHeroQueen, $eHeroPrince, $eHeroWarden, $eHeroChampion]
+	Local $HeroSlotsInfos[6] = [$eHeroKing, $eHeroQueen, $eHeroPrince, $eHeroWarden, $eHeroChampion, $eHeroDuke]
 	Local $b5SlotStatusAvail = BitAND($g_iHeroAvailable, $HeroSlotsInfos[$g_aiCmbCustomHeroOrder[4]])
 	Local $b5SlotStatusUp = BitAND($g_iHeroUpgradingBit, $HeroSlotsInfos[$g_aiCmbCustomHeroOrder[4]])
+	Local $b6SlotStatusAvail = 0, $b6SlotStatusUp = 0
+	If $g_aiCmbCustomHeroOrder[5] >= 0 Then
+		$b6SlotStatusAvail = BitAND($g_iHeroAvailable, $HeroSlotsInfos[$g_aiCmbCustomHeroOrder[5]])
+		$b6SlotStatusUp = BitAND($g_iHeroUpgradingBit, $HeroSlotsInfos[$g_aiCmbCustomHeroOrder[5]])
+	EndIf
 	$g_iHeroAvailable = $eHeroNone ; Reset hero available data
 	If $b5SlotStatusAvail Then $g_iHeroAvailable = BitOR($g_iHeroAvailable, $HeroSlotsInfos[$g_aiCmbCustomHeroOrder[4]])
 	If $b5SlotStatusUp Then $g_iHeroUpgradingBit = BitOR($g_iHeroUpgradingBit, $HeroSlotsInfos[$g_aiCmbCustomHeroOrder[4]])
+	; A sixth hero leaves two on the bench, keep the status of the second one as well
+	If $g_aiCmbCustomHeroOrder[5] >= 0 Then
+		If $b6SlotStatusAvail Then $g_iHeroAvailable = BitOR($g_iHeroAvailable, $HeroSlotsInfos[$g_aiCmbCustomHeroOrder[5]])
+		If $b6SlotStatusUp Then $g_iHeroUpgradingBit = BitOR($g_iHeroUpgradingBit, $HeroSlotsInfos[$g_aiCmbCustomHeroOrder[5]])
+	EndIf
 
 	Local $iDebugArmyHeroCount = 0 ; local debug flag
 
@@ -95,6 +105,12 @@ Func getArmyHeroCount($bOpenArmyWindow = False, $bCloseArmyWindow = False, $Chec
 					; unset Champion upgrading
 					$g_iHeroUpgrading[4] = 0
 					$g_iHeroUpgradingBit = BitAND($g_iHeroUpgradingBit, BitOR($eHeroKing, $eHeroPrince, $eHeroQueen, $eHeroWarden))
+				Case StringInStr($sResult, "duke", $STR_NOCASESENSEBASIC)
+					If $bSetLog Then SetLog(" - Dragon Duke Available", $COLOR_SUCCESS)
+					$g_iHeroAvailable = BitOR($g_iHeroAvailable, $eHeroDuke)
+					; unset Duke upgrading
+					$g_iHeroUpgrading[5] = 0
+					$g_iHeroUpgradingBit = BitAND($g_iHeroUpgradingBit, BitOR($eHeroKing, $eHeroQueen, $eHeroPrince, $eHeroWarden, $eHeroChampion))
 				Case StringInStr($sResult, "heal", $STR_NOCASESENSEBASIC)
 					If $g_bDebugSetLogTrain Or $iDebugArmyHeroCount = 1 Then
 						Switch $i
@@ -656,8 +672,8 @@ Func getArmyHeroCount($bOpenArmyWindow = False, $bCloseArmyWindow = False, $Chec
 		EndIf
 	Next
 
-	If $g_bDebugSetLogTrain Or $iDebugArmyHeroCount = 1 Then SetLog("Hero Status  K|Q|P|W|C : " & BitAND($g_iHeroAvailable, $eHeroKing) & "|" & BitAND($g_iHeroAvailable, $eHeroQueen) & "|" & BitAND($g_iHeroAvailable, $eHeroPrince) & "|" & BitAND($g_iHeroAvailable, $eHeroWarden) & "|" & BitAND($g_iHeroAvailable, $eHeroChampion), $COLOR_DEBUG)
-	If $g_bDebugSetLogTrain Or $iDebugArmyHeroCount = 1 Then SetLog("Hero Upgrade K|Q|P|W|C : " & BitAND($g_iHeroUpgradingBit, $eHeroKing) & "|" & BitAND($g_iHeroUpgradingBit, $eHeroQueen) & "|" & BitAND($g_iHeroUpgradingBit, $eHeroPrince) & "|" & BitAND($g_iHeroUpgradingBit, $eHeroWarden) & "|" & BitAND($g_iHeroUpgradingBit, $eHeroChampion), $COLOR_DEBUG)
+	If $g_bDebugSetLogTrain Or $iDebugArmyHeroCount = 1 Then SetLog("Hero Status  K|Q|P|W|C|D : " & BitAND($g_iHeroAvailable, $eHeroKing) & "|" & BitAND($g_iHeroAvailable, $eHeroQueen) & "|" & BitAND($g_iHeroAvailable, $eHeroPrince) & "|" & BitAND($g_iHeroAvailable, $eHeroWarden) & "|" & BitAND($g_iHeroAvailable, $eHeroChampion) & "|" & BitAND($g_iHeroAvailable, $eHeroDuke), $COLOR_DEBUG)
+	If $g_bDebugSetLogTrain Or $iDebugArmyHeroCount = 1 Then SetLog("Hero Upgrade K|Q|P|W|C|D : " & BitAND($g_iHeroUpgradingBit, $eHeroKing) & "|" & BitAND($g_iHeroUpgradingBit, $eHeroQueen) & "|" & BitAND($g_iHeroUpgradingBit, $eHeroPrince) & "|" & BitAND($g_iHeroUpgradingBit, $eHeroWarden) & "|" & BitAND($g_iHeroUpgradingBit, $eHeroChampion) & "|" & BitAND($g_iHeroUpgradingBit, $eHeroDuke), $COLOR_DEBUG)
 
 	If $bCloseArmyWindow Then CloseWindow()
 
@@ -691,6 +707,11 @@ Func ArmyHeroStatus($i)
 				GUICtrlSetState($g_hPicChampionRed, $GUI_HIDE)
 				GUICtrlSetState($g_hPicChampionBlue, $GUI_HIDE)
 				GUICtrlSetState($g_hPicChampionGreen, $GUI_HIDE)
+			Case 5
+				GUICtrlSetState($g_hPicDukeGray, $GUI_SHOW)
+				GUICtrlSetState($g_hPicDukeRed, $GUI_HIDE)
+				GUICtrlSetState($g_hPicDukeBlue, $GUI_HIDE)
+				GUICtrlSetState($g_hPicDukeGreen, $GUI_HIDE)
 		EndSwitch
 	EndIf
 
@@ -774,6 +795,14 @@ Func ArmyHeroStatus($i)
 						GUICtrlSetState($g_hPicChampionBlue, $GUI_HIDE)
 						GUICtrlSetState($g_hPicChampionRed, $GUI_SHOW)
 				EndSwitch
+			ElseIf $g_aiCmbCustomHeroOrder[$i] = 5 Then
+				Switch $aTempArray[0]
+					Case "upgrade"     ; Red
+						GUICtrlSetState($g_hPicDukeGray, $GUI_HIDE)
+						GUICtrlSetState($g_hPicDukeGreen, $GUI_HIDE)
+						GUICtrlSetState($g_hPicDukeBlue, $GUI_HIDE)
+						GUICtrlSetState($g_hPicDukeRed, $GUI_SHOW)
+				EndSwitch
 			EndIf
 			Return $aTempArray[0]
 		Next
@@ -808,6 +837,12 @@ Func ArmyHeroStatus($i)
 			GUICtrlSetState($g_hPicChampionBlue, $GUI_HIDE)
 			GUICtrlSetState($g_hPicChampionGreen, $GUI_SHOW)
 			Return "champion"
+		ElseIf $g_aiCmbCustomHeroOrder[$i] = 5 Then
+			GUICtrlSetState($g_hPicDukeGray, $GUI_HIDE)
+			GUICtrlSetState($g_hPicDukeRed, $GUI_HIDE)
+			GUICtrlSetState($g_hPicDukeBlue, $GUI_HIDE)
+			GUICtrlSetState($g_hPicDukeGreen, $GUI_SHOW)
+			Return "duke"
 		EndIf
 	EndIf
 
@@ -886,6 +921,11 @@ Func HiddenSlotstatus()
 				GUICtrlSetState($g_hPicChampionRed, $GUI_HIDE)
 				GUICtrlSetState($g_hPicChampionBlue, $GUI_HIDE)
 				GUICtrlSetState($g_hPicChampionGreen, $GUI_HIDE)
+			Case 5
+				GUICtrlSetState($g_hPicDukeGray, $GUI_SHOW)
+				GUICtrlSetState($g_hPicDukeRed, $GUI_HIDE)
+				GUICtrlSetState($g_hPicDukeBlue, $GUI_HIDE)
+				GUICtrlSetState($g_hPicDukeGreen, $GUI_HIDE)
 		EndSwitch
 		Return
 
@@ -951,6 +991,11 @@ Func HiddenSlotstatus()
 						GUICtrlSetState($g_hPicChampionRed, $GUI_HIDE)
 						GUICtrlSetState($g_hPicChampionBlue, $GUI_HIDE)
 						GUICtrlSetState($g_hPicChampionGreen, $GUI_HIDE)
+					Case 5
+						GUICtrlSetState($g_hPicDukeGray, $GUI_SHOW)
+						GUICtrlSetState($g_hPicDukeRed, $GUI_HIDE)
+						GUICtrlSetState($g_hPicDukeBlue, $GUI_HIDE)
+						GUICtrlSetState($g_hPicDukeGreen, $GUI_HIDE)
 				EndSwitch
 			EndIf
 		EndIf
@@ -998,6 +1043,11 @@ Func HiddenSlotstatus()
 					GUICtrlSetState($g_hPicChampionRed, $GUI_HIDE)
 					GUICtrlSetState($g_hPicChampionBlue, $GUI_HIDE)
 					GUICtrlSetState($g_hPicChampionGreen, $GUI_HIDE)
+				Case 5
+					GUICtrlSetState($g_hPicDukeGray, $GUI_SHOW)
+					GUICtrlSetState($g_hPicDukeRed, $GUI_HIDE)
+					GUICtrlSetState($g_hPicDukeBlue, $GUI_HIDE)
+					GUICtrlSetState($g_hPicDukeGreen, $GUI_HIDE)
 			EndSwitch
 			Return
 		EndIf
@@ -1265,6 +1315,15 @@ Func HiddenSlotstatus()
 				EndIf
 				CloseWindow()
 				Return
+			Case 5
+				; The Hero Hall card of the Dragon Duke has not been measured yet, its status is left unknown
+				SetLog($g_asHeroNames[5] & ": Hero Hall position not measured yet, status unknown", $COLOR_INFO)
+				GUICtrlSetState($g_hPicDukeGray, $GUI_SHOW)
+				GUICtrlSetState($g_hPicDukeRed, $GUI_HIDE)
+				GUICtrlSetState($g_hPicDukeBlue, $GUI_HIDE)
+				GUICtrlSetState($g_hPicDukeGreen, $GUI_HIDE)
+				CloseWindow()
+				Return
 		EndSwitch
 
 	EndIf
@@ -1390,7 +1449,7 @@ Func LabGuiDisplay() ; called from main loop to get an early status for indictor
 		Return True
 	ElseIf _ColorCheck(_GetPixelColor(775 - $GobBuilderOffsetRunning, 170 + $g_iMidOffsetY, True), Hex(0x8089AF, 6), 20) Then ; Look for light purple in upper right corner of lab window.
 		SetLog("Laboratory has Stopped", $COLOR_INFO)
-		If $g_bNotifyTGEnable And $g_bNotifyAlertLaboratoryIdle Then NotifyPushToTelegram($g_sNotifyOrigin & " | " & GetTranslatedFileIni("MBR Func_Notify", "Laboratory-Idle_Info_01", "Laboratory Idle") & "%0A" & GetTranslatedFileIni("MBR Func_Notify", "Laboratory-Idle_Info_02", "Laboratory has Stopped"))
+		If NotifyEnabled() And $g_bNotifyAlertLaboratoryIdle Then NotifyPushToTelegram($g_sNotifyOrigin & " | " & GetTranslatedFileIni("MBR Func_Notify", "Laboratory-Idle_Info_01", "Laboratory Idle") & "%0A" & GetTranslatedFileIni("MBR Func_Notify", "Laboratory-Idle_Info_02", "Laboratory has Stopped"))
 		CloseWindow()
 		;========Show Red  Hide Green  Hide Gray=====
 		GUICtrlSetState($g_hPicLabGray, $GUI_HIDE)
@@ -1418,7 +1477,9 @@ Func LabGuiDisplay() ; called from main loop to get an early status for indictor
 EndFunc   ;==>LabGuiDisplay
 
 Func HideShields($bHide = False)
-	Local Static $ShieldState[30]
+	; One entry per bottom bar control between the King shield and the lab timer: five per hero plus the
+	; lab display. The Dragon Duke took that range to 35, the old fixed 30 overflowed and crashed the bot on Stop.
+	Local Static $ShieldState[64]
 	Local $counter
 	If $bHide = True Then
 		$counter = 0
@@ -1536,6 +1597,8 @@ Func CheckHeroOrder()
 						$g_aiCmbCustomHeroOrder[$i] = 3
 					Case "champion"
 						$g_aiCmbCustomHeroOrder[$i] = 4
+					Case "duke"
+						$g_aiCmbCustomHeroOrder[$i] = 5
 				EndSwitch
 			Next
 			Local $HeroClickClose[2] = [Random($aHeroesClick[$i][0], $aHeroesClick[$i][2], 1), Random($aHeroesClick[$i][1], $aHeroesClick[$i][3], 1)]
@@ -1546,7 +1609,7 @@ Func CheckHeroOrder()
 	Next
 
 	If $g_aiHeroHallPos[2] > 6 Then
-		Local $ForKing = 0, $ForQueen = 0, $ForPrince = 0, $ForWarden = 0, $ForChampion = 0
+		Local $ForKing = 0, $ForQueen = 0, $ForPrince = 0, $ForWarden = 0, $ForChampion = 0, $ForDuke = 0
 		For $i = 0 To $eHeroSlots - 1
 			Switch $g_aiCmbCustomHeroOrder[$i]
 				Case 0
@@ -1559,19 +1622,21 @@ Func CheckHeroOrder()
 					$ForWarden += 1
 				Case 4
 					$ForChampion += 1
+				Case 5
+					$ForDuke += 1
 			EndSwitch
 		Next
-		If $ForKing = 0 Then
-			$g_aiCmbCustomHeroOrder[4] = 0
-		ElseIf $ForQueen = 0 Then
-			$g_aiCmbCustomHeroOrder[4] = 1
-		ElseIf $ForPrince = 0 Then
-			$g_aiCmbCustomHeroOrder[4] = 2
-		ElseIf $ForWarden = 0 Then
-			$g_aiCmbCustomHeroOrder[4] = 3
-		ElseIf $ForChampion = 0 Then
-			$g_aiCmbCustomHeroOrder[4] = 4
-		EndIf
+		; Four slots for up to six heroes: the first hero left out goes to [4] as before, the
+		; second one (only possible once the Dragon Duke is owned) to [5]
+		Local $aiForHero[6] = [$ForKing, $ForQueen, $ForPrince, $ForWarden, $ForChampion, $ForDuke]
+		$g_aiCmbCustomHeroOrder[5] = -1
+		Local $iBench = 4
+		For $h = 0 To 5
+			If $aiForHero[$h] = 0 And $iBench <= 5 Then
+				$g_aiCmbCustomHeroOrder[$iBench] = $h
+				$iBench += 1
+			EndIf
+		Next
 	Else
 		Switch $g_aiHeroHallPos[2]
 			Case 2
@@ -1779,9 +1844,35 @@ Func CheckHeroOrder()
 					EndIf
 				EndIf
 			EndIf
+		Case 5
+			If $g_bFirstStartForHiddenHero Then
+				GUICtrlSetState($g_hPicDukeGray, $GUI_SHOW)
+				GUICtrlSetState($g_hPicDukeRed, $GUI_HIDE)
+				GUICtrlSetState($g_hPicDukeBlue, $GUI_HIDE)
+				GUICtrlSetState($g_hPicDukeGreen, $GUI_HIDE)
+			Else
+				If BitAND($g_iHeroUpgradingBit, $eHeroDuke) = $eHeroDuke Then
+					GUICtrlSetState($g_hPicDukeGray, $GUI_HIDE)
+					GUICtrlSetState($g_hPicDukeRed, $GUI_SHOW)
+					GUICtrlSetState($g_hPicDukeBlue, $GUI_HIDE)
+					GUICtrlSetState($g_hPicDukeGreen, $GUI_HIDE)
+				Else
+					If BitAND($g_iHeroAvailable, $eHeroDuke) = $eHeroDuke Then
+						GUICtrlSetState($g_hPicDukeGray, $GUI_HIDE)
+						GUICtrlSetState($g_hPicDukeRed, $GUI_HIDE)
+						GUICtrlSetState($g_hPicDukeBlue, $GUI_HIDE)
+						GUICtrlSetState($g_hPicDukeGreen, $GUI_SHOW)
+					Else
+						GUICtrlSetState($g_hPicDukeGray, $GUI_SHOW)
+						GUICtrlSetState($g_hPicDukeRed, $GUI_HIDE)
+						GUICtrlSetState($g_hPicDukeBlue, $GUI_HIDE)
+						GUICtrlSetState($g_hPicDukeGreen, $GUI_HIDE)
+					EndIf
+				EndIf
+			EndIf
 	EndSwitch
 
-	Local $HeroSlotsInfos[5] = ["King", "Queen", "Prince", "Warden", "Champion"]
+	Local $HeroSlotsInfos[6] = ["King", "Queen", "Prince", "Warden", "Champion", "Duke"]
 	SetDebugLog("Hero Custom Order : " & $HeroSlotsInfos[$g_aiCmbCustomHeroOrder[0]] & "|" & $HeroSlotsInfos[$g_aiCmbCustomHeroOrder[1]] & "|" _
 			 & $HeroSlotsInfos[$g_aiCmbCustomHeroOrder[2]] & "|" & $HeroSlotsInfos[$g_aiCmbCustomHeroOrder[3]] & "|" & $HeroSlotsInfos[$g_aiCmbCustomHeroOrder[4]])
 

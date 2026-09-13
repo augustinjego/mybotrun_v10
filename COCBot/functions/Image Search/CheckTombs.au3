@@ -230,7 +230,7 @@ EndFunc   ;==>CleanYard
 
 Func ClickRemoveObstacle()
 	If _ColorCheck(_GetPixelColor(400, 285 + $g_iMidOffsetY, True), Hex(0xF3AA28, 6), 20) Then  ; close chat
-		If Not ClickB("ClanChat") Then
+		If Not ClickClanChatTab() Then
 			SetLog("Error finding the Clan Tab Button", $COLOR_ERROR)
 			Click(400, 312 + $g_iMidOffsetY)
 			Return

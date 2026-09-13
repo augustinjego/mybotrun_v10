@@ -15,8 +15,13 @@ Func StarBonus()
 
 	SetDebugLog("Begin Star Bonus window check", $COLOR_DEBUG1)
 
-	Local $aWindowChk1[4] = [630, 100 + $g_iMidOffsetY, 0x32A1F7, 20] ; Top Blue Sky
-	Local $aWindowChk2[4] = [570, 180 + $g_iMidOffsetY, 0xC8CBC6, 20] ; Grey star
+	; The "Star Bonus received!" window of CoC 18.600.5, measured on a live capture: a deep blue
+	; title band (0x3E2EB7 across the whole width at y 130), five white stars around y 210 and
+	; a green Okay button spanning x 355-515, y 533-603 with 0xC6EB60 in its upper half. The
+	; old checks looked for a light sky blue and a grey star that the redesign no longer has.
+	Local $aWindowChk1[4] = [630, 100 + $g_iMidOffsetY, 0x3E2EB7, 20] ; deep blue title band
+	Local $aWindowChk2[4] = [435, 180 + $g_iMidOffsetY, 0xF5F7F7, 20] ; middle white star
+	Local $aOkayGreen[4] = [380, 538 + $g_iMidOffsetY, 0xC6EB60, 20] ; upper half of the Okay button, left of its text
 
 	If _Sleep($DELAYSTARBONUS100) Then Return
 
@@ -26,6 +31,13 @@ Func StarBonus()
 		Local $aiOkayButton = findButton("Okay", Default, 1, True)
 		If IsArray($aiOkayButton) And UBound($aiOkayButton, 1) = 2 Then
 			PureClickP($aiOkayButton, 1, 100, "#0117") ; Click Okay Button
+			If _Sleep($DELAYSTARBONUS500) Then Return
+			$StarBonusReceived = 1
+			Return True
+		ElseIf _CheckPixel($aOkayGreen, $g_bCapturePixel, Default, "StarbonusOkay") Then
+			; The redrawn button is not matched by the Okay templates, but it always sits at the same place
+			SetDebugLog("Okay button found by its colour", $COLOR_DEBUG)
+			PureClick(435, 538 + $g_iMidOffsetY, 1, 100, "#0117")
 			If _Sleep($DELAYSTARBONUS500) Then Return
 			$StarBonusReceived = 1
 			Return True

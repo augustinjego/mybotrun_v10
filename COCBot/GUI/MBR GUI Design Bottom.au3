@@ -31,6 +31,7 @@ Global $g_hlblQueen = 0, $g_hPicQueenGray = 0, $g_hPicQueenBlue = 0, $g_hPicQuee
 Global $g_hlblPrince = 0, $g_hPicPrinceGray = 0, $g_hPicPrinceBlue = 0, $g_hPicPrinceRed = 0, $g_hPicPrinceGreen = 0
 Global $g_hlblWarden = 0, $g_hPicWardenGray = 0, $g_hPicWardenBlue = 0, $g_hPicWardenRed = 0, $g_hPicWardenGreen = 0
 Global $g_hlblChampion = 0, $g_hPicChampionGray = 0, $g_hPicChampionBlue = 0, $g_hPicChampionRed = 0, $g_hPicChampionGreen = 0
+Global $g_hlblDuke = 0, $g_hPicDukeGray = 0, $g_hPicDukeBlue = 0, $g_hPicDukeRed = 0, $g_hPicDukeGreen = 0
 Global $g_hlblLab = 0, $g_hPicLabGray = 0, $g_hPicLabRed = 0, $g_hPicLabGreen = 0, $g_hLbLLabTime = 0
 
 ; Pet House
@@ -188,6 +189,20 @@ Func CreateBottomPanel()
 	_GUICtrlSetTip(-1, $sTxtTip)
 	GUICtrlSetState(-1, $GUI_HIDE)
 	$g_hlblChampion = GUICtrlCreateLabel(GetTranslatedFileIni("MBR Global GUI Design Names Troops", "Champion_C", "C"), $x + 4, $y + 21, 10, 16, $SS_LEFT)
+	_GUICtrlSetTip(-1, $sTxtTip)
+	$x += 19
+	$g_hPicDukeGray = _GUICtrlCreateIcon($g_sLibIconPath, $eIcnGrayShield, $x, $y, 16, 16)
+	_GUICtrlSetTip(-1, $sTxtTip)
+	$g_hPicDukeBlue = _GUICtrlCreateIcon($g_sLibIconPath, $eIcnBlueShield, $x, $y, 16, 16)
+	_GUICtrlSetTip(-1, $sTxtTip)
+	GUICtrlSetState(-1, $GUI_HIDE)
+	$g_hPicDukeGreen = _GUICtrlCreateIcon($g_sLibIconPath, $eIcnGreenShield, $x, $y, 16, 16)
+	_GUICtrlSetTip(-1, $sTxtTip)
+	GUICtrlSetState(-1, $GUI_HIDE)
+	$g_hPicDukeRed = _GUICtrlCreateIcon($g_sLibIconPath, $eIcnRedShield, $x, $y, 16, 16)
+	_GUICtrlSetTip(-1, $sTxtTip)
+	GUICtrlSetState(-1, $GUI_HIDE)
+	$g_hlblDuke = GUICtrlCreateLabel(GetTranslatedFileIni("MBR Global GUI Design Names Troops", "Duke_D", "D"), $x + 4, $y + 21, 10, 16, $SS_LEFT)
 	_GUICtrlSetTip(-1, $sTxtTip)
 
 	; Lab display

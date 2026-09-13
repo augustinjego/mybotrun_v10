@@ -532,6 +532,46 @@ Func chkUpgradeChampion()
 	EndIf
 EndFunc   ;==>chkUpgradeChampion
 
+Func chkUpgradeDuke()
+	Local $ahGroupDukeWait[4] = [$g_hChkDBDukeWait, $g_hChkABDukeWait, $g_hPicDBDukeWait, $g_hPicABDukeWait]
+	Local $TxtTip = GetTranslatedFileIni("MBR GUI Design Child Attack - Search", "TxtDukeWait_Info_01", -1) & @CRLF & _
+			GetTranslatedFileIni("MBR GUI Design Child Attack - Search", "TxtDukeWait_Info_02", -1)
+	Local $TxtWarningTip = GetTranslatedFileIni("MBR GUI Design Child Attack - Search", "TxtDukeWait_Info_03", "ATTENTION: Dragon Duke auto upgrade is currently enable.")
+	If $g_iTownHallLevel > 14 Then ; Must be TH15 to have the Dragon Duke
+		If GUICtrlRead($g_hCmbBoostDuke) > 0 Then
+			GUICtrlSetState($g_hChkUpgradeDuke, $GUI_UNCHECKED + $GUI_DISABLE)
+			GUICtrlSetState($g_hChkRepUpgradeDuke, $GUI_UNCHECKED + $GUI_DISABLE)
+			$g_bUpgradeDukeEnable = False
+		Else
+			GUICtrlSetState($g_hChkUpgradeDuke, $GUI_ENABLE)
+		EndIf
+
+		If GUICtrlRead($g_hChkUpgradeDuke) = $GUI_CHECKED Then
+			$g_bUpgradeDukeEnable = True
+			_GUI_Value_STATE("SHOW", $groupDukeSleeping)
+			For $i In $ahGroupDukeWait
+				_GUICtrlSetTip($i, $TxtTip & @CRLF & $TxtWarningTip)
+			Next
+			GUICtrlSetState($g_hChkRepUpgradeDuke, $GUI_ENABLE)
+		Else
+			$g_bUpgradeDukeEnable = False
+			_GUI_Value_STATE("HIDE", $groupDukeSleeping)
+			For $i In $ahGroupDukeWait
+				_GUICtrlSetTip($i, $TxtTip)
+			Next
+			GUICtrlSetState($g_hChkRepUpgradeDuke, $GUI_UNCHECKED + $GUI_DISABLE)
+		EndIf
+	Else
+		GUICtrlSetState($g_hChkUpgradeDuke, BitOR($GUI_DISABLE, $GUI_UNCHECKED))
+		GUICtrlSetState($g_hChkRepUpgradeDuke, BitOR($GUI_DISABLE, $GUI_UNCHECKED))
+		$g_bUpgradeDukeEnable = False
+		_GUI_Value_STATE("HIDE", $groupDukeSleeping)
+		For $i In $ahGroupDukeWait
+			_GUICtrlSetTip($i, $TxtTip)
+		Next
+	EndIf
+EndFunc   ;==>chkUpgradeDuke
+
 Func chkUpgradePets()
 	If $g_iTownHallLevel = 14 Then ; Must be TH14 to have Pets 1->4
 		For $i = 0 To $ePetCount - 8
@@ -625,7 +665,7 @@ EndFunc   ;==>cmbHeroReservedBuilder
 
 Func ReducecmbHeroReservedBuilder()
 	Local $IsToUpNrbHeroes = 0
-	Local $CheckedHeroes[5] = [$g_bUpgradeKingEnable, $g_bUpgradeQueenEnable, $g_bUpgradePrinceEnable, $g_bUpgradeWardenEnable, $g_bUpgradeChampionEnable]
+	Local $CheckedHeroes[6] = [$g_bUpgradeKingEnable, $g_bUpgradeQueenEnable, $g_bUpgradePrinceEnable, $g_bUpgradeWardenEnable, $g_bUpgradeChampionEnable, $g_bUpgradeDukeEnable]
 	For $i = 0 To UBound($CheckedHeroes) - 1
 		If $CheckedHeroes[$i] Then $IsToUpNrbHeroes += 1
 	Next

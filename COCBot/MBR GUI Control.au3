@@ -2098,7 +2098,12 @@ Func Bind_ImageList($nCtrl, ByRef $hImageList)
 	If IsArray($aIconIndex) Then ; if array is filled then $nCtrl was a valid control
 		For $i = 0 To UBound($aIconIndex) - 1
 			DllStructSetData($tTcItem, 6, $i)
-			AddImageToTab($nCtrl, $hImageList, $i, $tTcItem, $g_sLibIconPath, $aIconIndex[$i] - 1)
+			If $nCtrl = $g_hGUI_VILLAGE_TAB And $i = 4 Then
+				; the Notify tab carries a bell of its own, the icon library only offers the Telegram mark
+				AddImageToTab($nCtrl, $hImageList, $i, $tTcItem, @ScriptDir & "\Images\notify_bell.ico", 0)
+			Else
+				AddImageToTab($nCtrl, $hImageList, $i, $tTcItem, $g_sLibIconPath, $aIconIndex[$i] - 1)
+			EndIf
 		Next
 		$aIconIndex = 0 ; empty array
 	EndIf

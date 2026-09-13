@@ -146,6 +146,26 @@ Func ClickB($sButtonName, $buttonTileArrayOrPatternOrFullPath = Default, $iDelay
 	Return False
 EndFunc   ;==>ClickB
 
+; CoC 18.600 replaced the chat tab by the Social button of the main screen, and the open panel is
+; folded back with the orange tab on its right edge. The ClanChatButton templates match neither, so
+; when they fail the panel state is read from its own pixels and the matching spot is clicked. Both
+; spots were measured on live captures: Social button (37, 340), fold tab (392, 340).
+Func ClickClanChatTab($iDelay = 100)
+	If ClickB("ClanChat", Default, $iDelay) Then Return True
+	Local $bWasOpen = IsMainChatOpenPage()
+	If $bWasOpen Then
+		Click(392, 310 + $g_iMidOffsetY, 1, 120, "#0001")
+	Else
+		Click(37, 310 + $g_iMidOffsetY, 1, 120, "#0001")
+	EndIf
+	If _Sleep(1500) Then Return False
+	If IsMainChatOpenPage() = $bWasOpen Then
+		SetDebugLog("ClickClanChatTab: the Social panel did not " & ($bWasOpen ? "close" : "open"), $COLOR_DEBUG)
+		Return False
+	EndIf
+	If _Sleep($iDelay) Then Return False
+	Return True
+EndFunc   ;==>ClickClanChatTab
 Func ClickButton($sButtonName, $buttonTileArrayOrPatternOrFullPath = Default, $iDelay = 100, $iLoop = 5)
 	For $i = 1 To $iLoop
 		Local $aiButton = findButton($sButtonName, $buttonTileArrayOrPatternOrFullPath, 1, True)

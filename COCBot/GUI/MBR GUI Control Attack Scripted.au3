@@ -273,7 +273,7 @@ Func ApplyScriptDB()
 	Local $sCSVCCSpl[$eSpellCount] = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
 	Local $ToIgnore[$eSpellCount] = [-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1]
 	Local $aiCSVSieges[$eSiegeMachineCount] = [0, 0, 0, 0, 0, 0, 0, 0]
-	Local $aiCSVHeros[$eHeroCount][2] = [[0, 0], [0, 0], [0, 0], [0, 0], [0, 0]]
+	Local $aiCSVHeros[$eHeroCount][2] = [[0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0]]
 	Local $aiCSVWardenMode = -1
 	Local $iCSVRedlineRoutineItem = 0, $iCSVDroplineEdgeItem = 0
 	Local $sCSVCCReq = ""
@@ -340,6 +340,9 @@ Func ApplyScriptDB()
 					Case $eHeroRoyalChampion
 						$g_iActivateChampion = $aiCSVHeros[$h][0] - 1
 						$g_iDelayActivateChampion = $aiCSVHeros[$h][1]
+					Case $eHeroDragonDuke
+						$g_iActivateDuke = $aiCSVHeros[$h][0] - 1
+						$g_iDelayActivateDuke = $aiCSVHeros[$h][1]
 				EndSwitch
 			EndIf
 		Next
@@ -350,6 +353,7 @@ Func ApplyScriptDB()
 		GUICtrlSetState($g_hChkDBQueenAttack, $aiCSVHeros[$eHeroArcherQueen][0] > 0 ? $GUI_CHECKED : GUICtrlGetState($g_hChkDBQueenAttack))
 		GUICtrlSetState($g_hChkDBPrinceAttack, $aiCSVHeros[$eHeroMinionPrince][0] > 0 ? $GUI_CHECKED : GUICtrlGetState($g_hChkDBPrinceAttack))
 		GUICtrlSetState($g_hChkDBWardenAttack, $aiCSVHeros[$eHeroGrandWarden][0] > 0 ? $GUI_CHECKED : GUICtrlGetState($g_hChkDBWardenAttack))
+		GUICtrlSetState($g_hChkDBDukeAttack, $aiCSVHeros[$eHeroDragonDuke][0] > 0 ? $GUI_CHECKED : GUICtrlGetState($g_hChkDBDukeAttack))
 		chkDBWardenAttack()
 		GUICtrlSetState($g_hChkDBChampionAttack, $aiCSVHeros[$eHeroRoyalChampion][0] > 0 ? $GUI_CHECKED : GUICtrlGetState($g_hChkDBChampionAttack))
 		SetLog("CSV 'Attack with' Hero settings applied", $COLOR_SUCCESS)
@@ -431,7 +435,7 @@ Func ApplyScriptAB()
 	Local $sCSVCCSpl[$eSpellCount] = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
 	Local $ToIgnore[$eSpellCount] = [-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1]
 	Local $aiCSVSieges[$eSiegeMachineCount] = [0, 0, 0, 0, 0, 0, 0, 0]
-	Local $aiCSVHeros[$eHeroCount][2] = [[0, 0], [0, 0], [0, 0], [0, 0], [0, 0]]
+	Local $aiCSVHeros[$eHeroCount][2] = [[0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0]]
 	Local $aiCSVWardenMode = -1
 	Local $iCSVRedlineRoutineItem = 0, $iCSVDroplineEdgeItem = 0
 	Local $sCSVCCReq = ""
@@ -498,6 +502,9 @@ Func ApplyScriptAB()
 					Case $eHeroRoyalChampion
 						$g_iActivateChampion = $aiCSVHeros[$h][0] - 1
 						$g_iDelayActivateChampion = $aiCSVHeros[$h][1]
+					Case $eHeroDragonDuke
+						$g_iActivateDuke = $aiCSVHeros[$h][0] - 1
+						$g_iDelayActivateDuke = $aiCSVHeros[$h][1]
 				EndSwitch
 			EndIf
 		Next
@@ -508,6 +515,7 @@ Func ApplyScriptAB()
 		GUICtrlSetState($g_hChkABQueenAttack, $aiCSVHeros[$eHeroArcherQueen][0] > 0 ? $GUI_CHECKED : GUICtrlGetState($g_hChkABQueenAttack))
 		GUICtrlSetState($g_hChkABPrinceAttack, $aiCSVHeros[$eHeroMinionPrince][0] > 0 ? $GUI_CHECKED : GUICtrlGetState($g_hChkABPrinceAttack))
 		GUICtrlSetState($g_hChkABWardenAttack, $aiCSVHeros[$eHeroGrandWarden][0] > 0 ? $GUI_CHECKED : GUICtrlGetState($g_hChkABWardenAttack))
+		GUICtrlSetState($g_hChkABDukeAttack, $aiCSVHeros[$eHeroDragonDuke][0] > 0 ? $GUI_CHECKED : GUICtrlGetState($g_hChkABDukeAttack))
 		chkABWardenAttack()
 		GUICtrlSetState($g_hChkABChampionAttack, $aiCSVHeros[$eHeroRoyalChampion][0] > 0 ? $GUI_CHECKED : GUICtrlGetState($g_hChkABChampionAttack))
 		SetLog("CSV 'Attack with' Hero settings applied", $COLOR_SUCCESS)
@@ -660,16 +668,19 @@ Func AttackNow()
 	$g_bCheckPrincePower = False
 	$g_bCheckWardenPower = False
 	$g_bCheckChampionPower = False
+	$g_bCheckDukePower = False
 	$g_bDropKing = False
 	$g_bDropQueen = False
 	$g_bDropPrince = False
 	$g_bDropWarden = False
 	$g_bDropChampion = False
+	$g_bDropDuke = False
 	$g_aHeroesTimerActivation[$eHeroBarbarianKing] = 0
 	$g_aHeroesTimerActivation[$eHeroArcherQueen] = 0
 	$g_aHeroesTimerActivation[$eHeroMinionPrince] = 0
 	$g_aHeroesTimerActivation[$eHeroGrandWarden] = 0
 	$g_aHeroesTimerActivation[$eHeroRoyalChampion] = 0
+	$g_aHeroesTimerActivation[$eHeroDragonDuke] = 0
 
 	_ObjDeleteKey($g_oBldgAttackInfo, "") ; Remove all keys from building dictionary
 

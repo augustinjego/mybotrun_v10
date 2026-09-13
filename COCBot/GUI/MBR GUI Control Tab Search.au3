@@ -164,6 +164,7 @@ Func EnableSearchPanels($iMatchMode)
 			   GUICtrlRead($g_hChkDBPrinceWait) = $GUI_CHECKED Or _
 			   GUICtrlRead($g_hChkDBWardenWait) = $GUI_CHECKED Or _
 			   GUICtrlRead($g_hChkDBChampionWait) = $GUI_CHECKED Or _
+			   GUICtrlRead($g_hChkDBDukeWait) = $GUI_CHECKED Or _
 			   GUICtrlRead($g_hChkDBNotWaitHeroes) = $GUI_CHECKED Or _
 			   GUICtrlRead($g_hChkDBSpellsWait) = $GUI_CHECKED Then
 
@@ -186,6 +187,7 @@ Func EnableSearchPanels($iMatchMode)
 			   GUICtrlRead($g_hChkABPrinceWait) = $GUI_CHECKED Or _
 			   GUICtrlRead($g_hChkABWardenWait) = $GUI_CHECKED Or _
 			   GUICtrlRead($g_hChkABChampionWait) = $GUI_CHECKED Or _
+			   GUICtrlRead($g_hChkABDukeWait) = $GUI_CHECKED Or _
 			   GUICtrlRead($g_hChkABNotWaitHeroes) = $GUI_CHECKED Or _
 			   GUICtrlRead($g_hChkABSpellsWait) = $GUI_CHECKED Then
 
@@ -340,6 +342,24 @@ Func chkABChampionWait()
 		GUICtrlSetState($g_hChkABChampionAttack, BitOR($GUI_DISABLE, $GUI_UNCHECKED))
 	EndIf
 EndFunc   ;==>chkABChampionWait
+
+Func chkDBDukeWait()
+	If $g_iTownHallLevel > 14 Or $g_iTownHallLevel = 0 Then ; Must be TH15 to have the Dragon Duke
+		_GUI_Value_STATE("ENABLE", $g_hChkDBDukeWait & "#" & $g_hChkDBDukeAttack)
+	Else
+		GUICtrlSetState($g_hChkDBDukeWait, BitOR($GUI_DISABLE, $GUI_UNCHECKED))
+		GUICtrlSetState($g_hChkDBDukeAttack, BitOR($GUI_DISABLE, $GUI_UNCHECKED))
+	EndIf
+EndFunc   ;==>chkDBDukeWait
+
+Func chkABDukeWait()
+	If $g_iTownHallLevel > 14 Or $g_iTownHallLevel = 0 Then ; Must be TH15 to have the Dragon Duke
+		_GUI_Value_STATE("ENABLE", $g_hChkABDukeWait & "#" & $g_hChkABDukeAttack)
+	Else
+		GUICtrlSetState($g_hChkABDukeWait, BitOR($GUI_DISABLE, $GUI_UNCHECKED))
+		GUICtrlSetState($g_hChkABDukeAttack, BitOR($GUI_DISABLE, $GUI_UNCHECKED))
+	EndIf
+EndFunc   ;==>chkABDukeWait
 
 Func chkDBSpellsWait()
 	If $g_iTownHallLevel > 4 Or $g_iTownHallLevel = 0 Then ; Must be TH5+ to have spells

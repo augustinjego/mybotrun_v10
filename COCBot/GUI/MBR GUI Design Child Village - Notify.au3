@@ -17,7 +17,8 @@ Global $g_hGUI_NOTIFY = 0, $g_hGUI_NOTIFY_TAB = 0, $g_hGUI_NOTIFY_TAB_ITEM2 = 0
 
 Global $g_hGrpNotify = 0
 ; Global $g_hChkNotifyPBEnable = 0, $g_hTxtNotifyPBToken = 0
-Global $g_hChkNotifyTGEnable = 0, $g_hTxtNotifyTGToken = 0
+Global $g_hChkNotifyTGEnable = 0, $g_hTxtNotifyTGToken = 0, $g_hChkNotifyDiscordEnable = 0, $g_hTxtNotifyDiscordWebhook = 0
+Global $g_hBtnNotifyTestTG = 0, $g_hBtnNotifyTestDiscord = 0, $g_hChkNotifyDiscordFullLog = 0
 Global $g_hChkNotifyRemote = 0, $g_hTxtNotifyOrigin = 0
 ; Global $g_hChkNotifyDeleteAllPBPushes = 0, $g_hBtnNotifyDeleteMessages = 0, $g_hChkNotifyDeleteOldPBPushes = 0, $g_hCmbNotifyPushHours = 0, _
 Global $g_hChkNotifyAlertMatchFound = 0, $g_hChkNotifyAlertLastRaidIMG = 0, $g_hChkNotifyAlertLastRaidTXT = 0, $g_hChkNotifyAlertCampFull = 0, _
@@ -50,12 +51,30 @@ Func CreateVillageNotify()
 		$g_hChkNotifyTGEnable = GUICtrlCreateCheckbox(GetTranslatedFileIni("MBR GUI Design Child Village - Notify", "ChkNotifyTGEnable", "Enable Telegram"), $x + 40, $y + 5)
 			GUICtrlSetOnEvent(-1, "chkPBTGenabled")
 			_GUICtrlSetTip(-1, GetTranslatedFileIni("MBR GUI Design Child Village - Notify", "ChkNotifyTGEnable_Info_01", "Enable Telegram notifications"))
+		_GUICtrlCreatePng(@ScriptDir & "\Images\discord.png", $x + 163, $y, 32, 32)
+		$g_hChkNotifyDiscordEnable = GUICtrlCreateCheckbox(GetTranslatedFileIni("MBR GUI Design Child Village - Notify", "ChkNotifyDiscordEnable", "Enable Discord"), $x + 200, $y + 5)
+			GUICtrlSetOnEvent(-1, "chkDiscordEnabled")
+			_GUICtrlSetTip(-1, GetTranslatedFileIni("MBR GUI Design Child Village - Notify", "ChkNotifyDiscordEnable_Info_01", "Send the same notifications to a Discord channel through a webhook"))
 
-	$y += 40
+	$y += 34
 	$x -= 10
 		GUICtrlCreateLabel(GetTranslatedFileIni("MBR GUI Design Child Village - Notify", "LblNotifyTGToken", "Token (Telegram)") & ":", $x, $y, -1, -1, $SS_RIGHT)
-		$g_hTxtNotifyTGToken = GUICtrlCreateInput("", $x + 120, $y - 3, 280, 19)
+		$g_hTxtNotifyTGToken = GUICtrlCreateInput("", $x + 120, $y - 3, 235, 19)
 			_GUICtrlSetTip(-1, GetTranslatedFileIni("MBR GUI Design Child Village - Notify", "LblNotifyTGToken_Info_01", "You need a Token to use Telegram notifications. Get a token from Telegram.com"))
+			GUICtrlSetState(-1, $GUI_DISABLE)
+		$g_hBtnNotifyTestTG = GUICtrlCreateButton(GetTranslatedFileIni("MBR GUI Design Child Village - Notify", "BtnNotifyTest", "Test"), $x + 360, $y - 4, 50, 21)
+			GUICtrlSetOnEvent(-1, "btnNotifyTestTG")
+			_GUICtrlSetTip(-1, GetTranslatedFileIni("MBR GUI Design Child Village - Notify", "BtnNotifyTestTG_Info_01", "Send a test message with this token. Open your bot in Telegram and send it /start first, so it knows who you are."))
+			GUICtrlSetState(-1, $GUI_DISABLE)
+
+	$y += 22
+		GUICtrlCreateLabel(GetTranslatedFileIni("MBR GUI Design Child Village - Notify", "LblNotifyDiscordWebhook", "Webhook (Discord)") & ":", $x, $y, -1, -1, $SS_RIGHT)
+		$g_hTxtNotifyDiscordWebhook = GUICtrlCreateInput("", $x + 120, $y - 3, 235, 19)
+			_GUICtrlSetTip(-1, GetTranslatedFileIni("MBR GUI Design Child Village - Notify", "LblNotifyDiscordWebhook_Info_01", "Discord channel settings > Integrations > Webhooks > New Webhook > Copy Webhook URL, then paste it here (the full URL, or just its end: id/token)"))
+			GUICtrlSetState(-1, $GUI_DISABLE)
+		$g_hBtnNotifyTestDiscord = GUICtrlCreateButton(GetTranslatedFileIni("MBR GUI Design Child Village - Notify", "BtnNotifyTest", "Test"), $x + 360, $y - 4, 50, 21)
+			GUICtrlSetOnEvent(-1, "btnNotifyTestDiscord")
+			_GUICtrlSetTip(-1, GetTranslatedFileIni("MBR GUI Design Child Village - Notify", "BtnNotifyTestDiscord_Info_01", "Send a test message to this webhook"))
 			GUICtrlSetState(-1, $GUI_DISABLE)
 
 	$y += 25
@@ -65,8 +84,12 @@ Func CreateVillageNotify()
 		GUICtrlCreateLabel(GetTranslatedFileIni("MBR GUI Design Child Village - Notify", "LblNotifyOrigin", "Origin") & ":", $x + 120, $y + 3, -1, -1, $SS_RIGHT)
 			$sTxtTip = GetTranslatedFileIni("MBR GUI Design Child Village - Notify", "LblNotifyOrigin_Info_01", "Origin - Village name.")
 			_GUICtrlSetTip(-1, $sTxtTip)
-		$g_hTxtNotifyOrigin = GUICtrlCreateInput("", $x + 170, $y, 230, 19)
+		$g_hTxtNotifyOrigin = GUICtrlCreateInput("", $x + 170, $y, 115, 19)
 			_GUICtrlSetTip(-1, $sTxtTip)
+			GUICtrlSetState(-1, $GUI_DISABLE)
+		$g_hChkNotifyDiscordFullLog = GUICtrlCreateCheckbox(GetTranslatedFileIni("MBR GUI Design Child Village - Notify", "ChkNotifyDiscordFullLog", "Full log to Discord"), $x + 292, $y, 118, 19)
+			GUICtrlSetOnEvent(-1, "chkDiscordFullLog")
+			_GUICtrlSetTip(-1, GetTranslatedFileIni("MBR GUI Design Child Village - Notify", "ChkNotifyDiscordFullLog_Info_01", "Post every line of the bot log to the Discord webhook, in batches every 20 seconds (needs Enable Discord)."))
 			GUICtrlSetState(-1, $GUI_DISABLE)
 
 	$y += 25

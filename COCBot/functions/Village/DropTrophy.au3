@@ -14,6 +14,12 @@
 ; ===============================================================================================================================
 
 Func DropTrophy()
+	; CoC 18.600 replaced trophies with league tiers, there is nothing left to drop
+	If Not $g_bDropTrophyObsoleteLogged Then
+		SetLog("Drop Trophy: trophies no longer exist in Clash of Clans 18.600, option ignored", $COLOR_INFO)
+		$g_bDropTrophyObsoleteLogged = True
+	EndIf
+	Return
 
 	If $g_bDropTrophyEnable Then
 		SetDebugLog("Drop Trophy()", $COLOR_DEBUG)
@@ -186,7 +192,7 @@ Func DropTrophy()
 
 
 					;c) check if hero avaiable and drop according to priority
-					If ($g_iQueenSlot <> -1 Or $g_iKingSlot <> -1 Or $g_iPrinceSlot <> -1 Or $g_iWardenSlot <> -1 Or $g_iChampionSlot <> -1) Then
+					If ($g_iQueenSlot <> -1 Or $g_iKingSlot <> -1 Or $g_iPrinceSlot <> -1 Or $g_iWardenSlot <> -1 Or $g_iChampionSlot <> -1 Or $g_iDukeSlot <> -1) Then
 						Local $sHeroPriority
 						Switch $g_iDropTrophyHeroesPriority
 							Case 0
@@ -206,10 +212,11 @@ Func DropTrophy()
 							Case 7
 								$sHeroPriority = "CQWPK"
 						EndSwitch
+						$sHeroPriority &= "D" ; the Dragon Duke is always the last choice, the priority combo predates it
 
 						Local $t
 						Local $DELAYDROPTROPHYHERO = _Sleep(Random(850, 1350, 1))
-						For $i = 1 To 5
+						For $i = 1 To 6
 							$t = StringMid($sHeroPriority, $i, 1)
 							Switch $t
 								Case "Q"
@@ -277,11 +284,24 @@ Func DropTrophy()
 										If _Sleep($DELAYDROPTROPHY1) Then ExitLoop
 										ExitLoop
 									EndIf
+								Case "D"
+									If $g_iDukeSlot <> -1 Then
+										SetTrophyLoss()
+										SetLog("Deploying Dragon Duke", $COLOR_INFO)
+										SelectDropTroop($g_iDukeSlot)
+										If _Sleep($DELAYDROPTROPHY1) Then ExitLoop
+										Click($aRandomEdge[$iRandomXY][0], $aRandomEdge[$iRandomXY][1], 1, 120, "#0000") ;Drop Duke
+										If _Sleep($DELAYDROPTROPHYHERO) Then ExitLoop
+										SelectDropTroop($g_iDukeSlot) ;If Duke was not activated: Boost Duke before EndBattle to restore some health
+										ReturnfromDropTrophies()
+										If _Sleep($DELAYDROPTROPHY1) Then ExitLoop
+										ExitLoop
+									EndIf
 							EndSwitch
 						Next
 					EndIf
 				EndIf
-				If ($g_iQueenSlot = -1 And $g_iKingSlot = -1 And $g_iPrinceSlot = -1 And $g_iWardenSlot = -1 And $g_iChampionSlot = -1) Or $g_bDropTrophyUseHeroes = 0 Then
+				If ($g_iQueenSlot = -1 And $g_iKingSlot = -1 And $g_iPrinceSlot = -1 And $g_iWardenSlot = -1 And $g_iChampionSlot = -1 And $g_iDukeSlot = -1) Or $g_bDropTrophyUseHeroes = 0 Then
 					$aRandomEdge = $g_aaiEdgeDropPoints[Round(Random(0, 3))]
 					$iRandomXY = Round(Random(0, 4))
 					SetDebugLog("Troop Loc = " & $iRandomXY & ", X:Y= " & $aRandomEdge[$iRandomXY][0] & "|" & $aRandomEdge[$iRandomXY][1], $COLOR_DEBUG)

@@ -53,10 +53,7 @@ Func AttackReport()
 		If _Sleep($DELAYATTACKREPORT2) Then Return
 		$g_iStatsLastAttack[$eLootDarkElixir] = getResourcesLootDE(400, 381 + $g_iMidOffsetY)
 		If _Sleep($DELAYATTACKREPORT2) Then Return
-		$g_iStatsLastAttack[$eLootTrophy] = getResourcesLootT(403, 402 + $g_iMidOffsetY)
-		If _ColorCheck(_GetPixelColor($aAtkRprtTrophyCheck[0], $aAtkRprtTrophyCheck[1], True), Hex($aAtkRprtTrophyCheck[2], 6), $aAtkRprtTrophyCheck[3]) Then
-			$g_iStatsLastAttack[$eLootTrophy] = -$g_iStatsLastAttack[$eLootTrophy]
-		EndIf
+		$g_iStatsLastAttack[$eLootTrophy] = 0 ; CoC 18.600 shows no trophy line on the end screen any more
 		SetLog("Loot: [G]: " & _NumberFormat($g_iStatsLastAttack[$eLootGold]) & " [E]: " & _NumberFormat($g_iStatsLastAttack[$eLootElixir]) & " [DE]: " & _NumberFormat($g_iStatsLastAttack[$eLootDarkElixir]) & " [T]: " & $g_iStatsLastAttack[$eLootTrophy], $COLOR_SUCCESS)
 	Else
 		; Same rows as the branch above, without the dark elixir line
@@ -64,10 +61,7 @@ Func AttackReport()
 		If _Sleep($DELAYATTACKREPORT2) Then Return
 		$g_iStatsLastAttack[$eLootElixir] = getResourcesLoot(345, 340 + $g_iMidOffsetY)
 		If _Sleep($DELAYATTACKREPORT2) Then Return
-		$g_iStatsLastAttack[$eLootTrophy] = getResourcesLootT(403, 365 + $g_iMidOffsetY)
-		If _ColorCheck(_GetPixelColor($aAtkRprtTrophyCheck[0], $aAtkRprtTrophyCheck[1], True), Hex($aAtkRprtTrophyCheck[2], 6), $aAtkRprtTrophyCheck[3]) Then
-			$g_iStatsLastAttack[$eLootTrophy] = -$g_iStatsLastAttack[$eLootTrophy]
-		EndIf
+		$g_iStatsLastAttack[$eLootTrophy] = 0 ; CoC 18.600 shows no trophy line on the end screen any more
 		$g_iStatsLastAttack[$eLootDarkElixir] = ""
 		SetLog("Loot: [G]: " & _NumberFormat($g_iStatsLastAttack[$eLootGold]) & " [E]: " & _NumberFormat($g_iStatsLastAttack[$eLootElixir]) & " [T]: " & $g_iStatsLastAttack[$eLootTrophy], $COLOR_SUCCESS)
 	EndIf
@@ -156,56 +150,13 @@ Func AttackReport()
 					EndIf
 				EndIf
 			EndIf
-
-			$g_asLeagueDetailsShort = "--"
-			For $i = 1 To 21 ; skip 0 = Bronze III, see "No Bonus" else section below
-				If _Sleep($DELAYATTACKREPORT2) Then Return
-				If $g_asLeagueDetails[$i][0] = $iCalcMaxBonus Then
-					SetLog("Your league level is: " & $g_asLeagueDetails[$i][1])
-					$g_asLeagueDetailsShort = $g_asLeagueDetails[$i][3]
-					ExitLoop
-				EndIf
-			Next
 		Else
 			SetLog("No Bonus")
-
-			$g_asLeagueDetailsShort = "--"
-			If $g_aiCurrentLoot[$eLootTrophy] + $g_iStatsLastAttack[$eLootTrophy] >= 400 And $g_aiCurrentLoot[$eLootTrophy] + $g_iStatsLastAttack[$eLootTrophy] < 500 Then ; Bronze III has no League bonus
-				SetLog("Your league level is: " & $g_asLeagueDetails[0][1])
-				$g_asLeagueDetailsShort = $g_asLeagueDetails[0][3]
-			EndIf
 		EndIf
-		;Display League in Stats ==>
-		GUICtrlSetData($g_hLblLeague, "")
-
-		If StringInStr($g_asLeagueDetailsShort, "1") > 1 Then
-			GUICtrlSetData($g_hLblLeague, "1")
-		ElseIf StringInStr($g_asLeagueDetailsShort, "2") > 1 Then
-			GUICtrlSetData($g_hLblLeague, "2")
-		ElseIf StringInStr($g_asLeagueDetailsShort, "3") > 1 Then
-			GUICtrlSetData($g_hLblLeague, "3")
-		EndIf
-		_GUI_Value_STATE("HIDE", $g_aGroupLeague)
-		If StringInStr($g_asLeagueDetailsShort, "B") > 0 Then
-			GUICtrlSetState($g_ahPicLeague[$eLeagueBronze], $GUI_SHOW)
-		ElseIf StringInStr($g_asLeagueDetailsShort, "S") > 0 Then
-			GUICtrlSetState($g_ahPicLeague[$eLeagueSilver], $GUI_SHOW)
-		ElseIf StringInStr($g_asLeagueDetailsShort, "G") > 0 Then
-			GUICtrlSetState($g_ahPicLeague[$eLeagueGold], $GUI_SHOW)
-		ElseIf StringInStr($g_asLeagueDetailsShort, "c", $STR_CASESENSE) > 0 Then
-			GUICtrlSetState($g_ahPicLeague[$eLeagueCrystal], $GUI_SHOW)
-		ElseIf StringInStr($g_asLeagueDetailsShort, "M") > 0 Then
-			GUICtrlSetState($g_ahPicLeague[$eLeagueMaster], $GUI_SHOW)
-		ElseIf StringInStr($g_asLeagueDetailsShort, "C", $STR_CASESENSE) > 0 Then
-			GUICtrlSetState($g_ahPicLeague[$eLeagueChampion], $GUI_SHOW)
-		ElseIf StringInStr($g_asLeagueDetailsShort, "T") > 0 Then
-			GUICtrlSetState($g_ahPicLeague[$eLeagueTitan], $GUI_SHOW)
-		ElseIf StringInStr($g_asLeagueDetailsShort, "LE") > 0 Then
-			GUICtrlSetState($g_ahPicLeague[$eLeagueLegend], $GUI_SHOW)
-		Else
-			GUICtrlSetState($g_ahPicLeague[$eLeagueUnranked], $GUI_SHOW)
-		EndIf
-		;==> Display League in Stats
+		; CoC 18.600: the league is the tier read on the badge, no longer derived from the loot bonus table
+		$g_asLeagueDetailsShort = LeagueTierShort($g_aiCurrentLoot[$eLootTrophy])
+		SetLog("League: " & LeagueTierName($g_aiCurrentLoot[$eLootTrophy]))
+		UpdateLeagueDisplay($g_aiCurrentLoot[$eLootTrophy])
 	Else
 		$g_iStatsBonusLast[$eLootGold] = 0
 		$g_iStatsBonusLast[$eLootElixir] = 0
@@ -299,6 +250,7 @@ Func AttackReport()
 	$g_iBattleRewardGold = 0
 	$g_iBattleRewardElixir = 0
 	$g_bBattleRewardTaken = False
+	$g_iBattleRewardScans = 0
 	$g_iSidesAttack = 0
 
 EndFunc   ;==>AttackReport

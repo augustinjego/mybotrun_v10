@@ -154,7 +154,7 @@ Func CreateGainSubTab()
 	GUICtrlCreateLabel(GetTranslatedFileIni("MBR GUI Design Child Bot - Stats", "LblLeague", "League"), $x + 3, $y, -1, -1, $SS_CENTER)
 
 	;-->Display League Level in Stats
-	$g_hLblLeague = GUICtrlCreateLabel("", $x + 43, $y + 53, 17, 17, $SS_CENTER)
+	$g_hLblLeague = GUICtrlCreateLabel("", $x + 36, $y + 53, 26, 17, $SS_CENTER) ; two digits since CoC 18.600 (league tier 1-36)
 	GUICtrlSetFont(-1, 11, $FW_BOLD, Default, "Arial", $CLEARTYPE_QUALITY)
 	GUICtrlSetColor(-1, $COLOR_BLACK)
 	GUICtrlCreateGroup("", -99, -99, 1, 1)
@@ -169,7 +169,7 @@ Func CreateGainSubTab()
 	GUICtrlSetBkColor(-1, 0xC3C3C3)
 	GUICtrlCreateLabel(GetTranslatedFileIni("MBR GUI Design Child Bot - Stats", "LblDarkE", "DarkE"), $x - 23 + (65 * 4), $y - 32, 90, 17, $SS_CENTER)
 	GUICtrlSetBkColor(-1, 0xC3C3C3)
-	GUICtrlCreateLabel(GetTranslatedFileIni("MBR GUI Design Child Bot - Stats", "LblTrophy", "Trophy"), $x - 23 + (70 * 5), $y - 32, 75, 17, $SS_CENTER)
+	GUICtrlCreateLabel(GetTranslatedFileIni("MBR GUI Design Child Bot - Stats", "LblTrophy", "League"), $x - 23 + (70 * 5), $y - 32, 75, 17, $SS_CENTER)
 	GUICtrlSetBkColor(-1, 0xC3C3C3)
 	GUICtrlCreateGroup("", $x - 20, $y - 20, 422, 28)
 

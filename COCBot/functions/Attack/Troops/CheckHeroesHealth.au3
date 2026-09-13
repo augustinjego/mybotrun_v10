@@ -14,12 +14,12 @@
 ; ===============================================================================================================================
 Func CheckHeroesHealth()
 
-	If $g_bCheckKingPower Or $g_bCheckQueenPower Or $g_bCheckPrincePower Or $g_bCheckWardenPower Or $g_bCheckChampionPower Then
+	If $g_bCheckKingPower Or $g_bCheckQueenPower Or $g_bCheckPrincePower Or $g_bCheckWardenPower Or $g_bCheckChampionPower Or $g_bCheckDukePower Then
 		ForceCaptureRegion() ; ensure no screenshot caching kicks in
 
-		Local $aDisplayTime[$eHeroCount] = [0, 0, 0, 0, 0] ; array to hold converted timerdiff into seconds
+		Local $aDisplayTime[$eHeroCount] = [0, 0, 0, 0, 0, 0] ; array to hold converted timerdiff into seconds
 
-		If $g_iKingSlot >= 11 Or $g_iQueenSlot >= 11 Or $g_iPrinceSlot >= 11 Or $g_iWardenSlot >= 11 Or $g_iChampionSlot >= 11 Then
+		If $g_iKingSlot >= 11 Or $g_iQueenSlot >= 11 Or $g_iPrinceSlot >= 11 Or $g_iWardenSlot >= 11 Or $g_iChampionSlot >= 11 Or $g_iDukeSlot >= 11 Then
 			If Not $g_bDraggedAttackBar Then DragAttackBar($g_iTotalAttackSlot, False)         ; drag forward
 		ElseIf $g_iKingSlot >= 0 And $g_iQueenSlot >= 0 And $g_iPrinceSlot >= 0 And $g_iWardenSlot >= 0 And $g_iChampionSlot >= 0 And ($g_iKingSlot < $g_iTotalAttackSlot - 10 Or $g_iQueenSlot < $g_iTotalAttackSlot - 10 Or _
 				$g_iPrinceSlot < $g_iTotalAttackSlot - 10 Or $g_iWardenSlot < $g_iTotalAttackSlot - 10 Or $g_iChampionSlot < $g_iTotalAttackSlot - 10) Then
@@ -221,6 +221,46 @@ Func CheckHeroesHealth()
 						$g_iCSVLastTroopPositionDropTroopFromINI = $g_iChampionSlot
 						$g_bCheckChampionPower = False ; Reset check power flag
 						$g_aHeroesTimerActivation[$eHeroRoyalChampion] = 0 ; Reset Timer
+					EndIf
+				EndIf
+			EndIf
+		EndIf
+
+		If $g_bDebugSetLog Then
+			SetDebugLog("CheckHeroesHealth() for Dragon Duke started ")
+			If _Sleep($DELAYRESPOND) Then Return ; improve pause button response
+		EndIf
+
+		If $g_iActivateDuke = 0 Or $g_iActivateDuke = 2 And ($g_aHeroesTimerActivation[$eHeroDragonDuke] = 0 Or __TimerDiff($g_aHeroesTimerActivation[$eHeroDragonDuke]) > $DELAYCHECKHEROESHEALTH) Then
+			If $g_bCheckDukePower Then
+				Local $asDukeResult = decodeSingleCoord(FindImageInPlace2("Duke", $g_sImgDukeBar, 0, 570 + $g_iBottomOffsetY, 858, 638 + $g_iBottomOffsetY, True)) ; Looking for Duke
+				If IsArray($asDukeResult) And UBound($asDukeResult) = 2 Then
+					Local $aDukeHealthCopy = $aDukeHealth
+					$aDukeHealthCopy[0] = $asDukeResult[0] - $aDukeHealthCopy[4]
+					Local $DukePixelColor = _GetPixelColor($aDukeHealthCopy[0], $aDukeHealthCopy[1], $g_bCapturePixel)
+					If $g_bDebugSetLog Then SetDebugLog("Dragon Duke _GetPixelColor(" & $aDukeHealthCopy[0] & "," & $aDukeHealthCopy[1] & "): " & $DukePixelColor, $COLOR_DEBUG)
+					If Not _CheckPixel2($aDukeHealthCopy, $DukePixelColor, "Red+Blue") Then
+						SetLog("Dragon Duke is getting weak, Activating Dragon Duke's ability", $COLOR_INFO)
+						ClickP($asDukeResult, 2)
+						$g_iCSVLastTroopPositionDropTroopFromINI = $g_iDukeSlot
+						$g_bCheckDukePower = False
+					EndIf
+				EndIf
+			EndIf
+		EndIf
+		If $g_iActivateDuke = 1 Or $g_iActivateDuke = 2 Then
+			If $g_bCheckDukePower Then
+				If $g_aHeroesTimerActivation[$eHeroDragonDuke] <> 0 Then
+					$aDisplayTime[$eHeroDragonDuke] = Ceiling(__TimerDiff($g_aHeroesTimerActivation[$eHeroDragonDuke]) / 1000) ; seconds
+				EndIf
+				If (Int($g_iDelayActivateDuke) / 1000) <= $aDisplayTime[$eHeroDragonDuke] Then
+					Local $asDukeResult = decodeSingleCoord(FindImageInPlace2("Duke", $g_sImgDukeBar, 0, 570 + $g_iBottomOffsetY, 858, 638 + $g_iBottomOffsetY, True)) ; Looking for Duke
+					If IsArray($asDukeResult) And UBound($asDukeResult) = 2 Then
+						SetLog("Activating Dragon Duke's ability after " & $aDisplayTime[$eHeroDragonDuke] & "'s", $COLOR_INFO)
+						ClickP($asDukeResult, 2)
+						$g_iCSVLastTroopPositionDropTroopFromINI = $g_iDukeSlot
+						$g_bCheckDukePower = False ; Reset check power flag
+						$g_aHeroesTimerActivation[$eHeroDragonDuke] = 0 ; Reset Timer
 					EndIf
 				EndIf
 			EndIf

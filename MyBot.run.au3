@@ -1,4 +1,4 @@
-﻿; #FUNCTION# ====================================================================================================================
+; #FUNCTION# ====================================================================================================================
 ; Name ..........: MBR Bot
 ; Description ...: This file contains the initialization and main loop sequences f0r the MBR Bot
 ; Author ........:  (2014)
@@ -775,7 +775,7 @@ Func runBot() ;Bot that runs everything in order
 				Next
 				BoostEverything() ; 1st Check if is to use Training Potion
 				If $g_bRestart Then ContinueLoop
-				Local $aRndFuncList = ['BoostBarracks', 'BoostSpellFactory', 'BoostWorkshop', 'BoostKing', 'BoostQueen', 'BoostPrince', 'BoostWarden', 'BoostChampion']
+				Local $aRndFuncList = ['BoostBarracks', 'BoostSpellFactory', 'BoostWorkshop', 'BoostKing', 'BoostQueen', 'BoostPrince', 'BoostWarden', 'BoostChampion', 'BoostDuke']
 				_ArrayShuffle($aRndFuncList)
 				For $Index In $aRndFuncList
 					If Not $g_bRunState Then Return
@@ -1229,6 +1229,10 @@ Func __RunFunction($action)
 
 		Case "BoostChampion"
 			BoostChampion()
+			If _Sleep($DELAYRESPOND) Then Return
+
+		Case "BoostDuke"
+			BoostDuke()
 			If _Sleep($DELAYRESPOND) Then Return
 
 		Case "BoostEverything"

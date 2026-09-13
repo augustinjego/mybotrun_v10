@@ -213,6 +213,7 @@ Global $g_sImgKingBar = @ScriptDir & "\imgxml\AttackBar\King*"
 Global $g_sImgPrinceBar = @ScriptDir & "\imgxml\AttackBar\Prince*"
 Global $g_sImgWardenBar = @ScriptDir & "\imgxml\AttackBar\Warden*"
 Global $g_sImgChampionBar = @ScriptDir & "\imgxml\AttackBar\Champion*"
+Global $g_sImgDukeBar = @ScriptDir & "\imgxml\AttackBar\Duke*" ; no template shipped yet, the Duke is reported absent until one exists
 #EndRegion Attack
 
 #Region Search

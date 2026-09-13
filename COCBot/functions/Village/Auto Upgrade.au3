@@ -178,6 +178,8 @@ Func _AutoUpgrade()
 				$bMustIgnoreUpgrade = ($g_iChkUpgradesToIgnore[5] = 1 Or $g_bUpgradeWardenEnable = True) ? True : False ; if upgrade warden is selected, will ignore it
 			Case "Royal Champion"
 				$bMustIgnoreUpgrade = ($g_iChkUpgradesToIgnore[6] = 1 Or $g_bUpgradeChampionEnable = True) ? True : False ; if upgrade champion is selected, will ignore it
+			Case "Dragon Duke"
+				$bMustIgnoreUpgrade = ($g_bUpgradeDukeEnable = True) ? True : False ; no ignore checkbox of its own yet, follows the hero upgrade option
 			Case "Clan Castle"
 				$bMustIgnoreUpgrade = ($g_iChkUpgradesToIgnore[7] = 1) ? True : False
 			Case "Laboratory"
@@ -409,7 +411,7 @@ Func _AutoUpgrade()
 			Case "Monolith"
 				$g_iNbrOfBuildingsUppedDElixir += 1
 				$g_iCostDElixirBuilding += $g_aUpgradeResourceCostDuration[1]
-			Case "Barbarian King", "Archer Queen", "Minion Prince", "Royal Champion"
+			Case "Barbarian King", "Archer Queen", "Minion Prince", "Royal Champion", "Dragon Duke"
 				$g_iNbrOfHeroesUpped += 1
 				$g_iCostDElixirHero += $g_aUpgradeResourceCostDuration[1]
 			Case "Grand Warden"

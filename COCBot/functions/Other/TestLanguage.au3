@@ -16,15 +16,73 @@
 
 Func TestLanguage()
 	If Not $g_bRunState Then Return
-	; test the word "Attack!" on the Attack Button in the lower left corner
-	If getOcrLanguage($aDetectLang[0], $aDetectLang[1]) = "english" Then
-		SetLog("Language setting is English: Correct.", $COLOR_INFO)
-		Return True
-	ElseIf Not ChangeLanguage() Then
+	; test the word "Attack!" on the Attack Button in the lower left corner. Right after a start a
+	; popup, a tooltip or a loading animation can still cover the button, so the word is read up to
+	; three times, clearing the screen in between, before the game is declared not in English.
+	Local $sRead = ""
+	For $i = 1 To 3
+		$sRead = getOcrLanguage($aDetectLang[0], $aDetectLang[1])
+		If StringLower(StringStripWS($sRead, 3)) = "english" Then
+			SetLog("Language setting is English: Correct.", $COLOR_INFO)
+			Return True
+		EndIf
+		SetDebugLog("TestLanguage: attempt " & $i & " read [" & $sRead & "] on the Attack button", $COLOR_DEBUG)
+		; second opinion without the DLL OCR: the white pixels of the label compared to "Attack!"
+		Local $fMatch = __AttackLabelMatch()
+		SetDebugLog("TestLanguage: pixel match of the Attack! label " & Round($fMatch, 2), $COLOR_DEBUG)
+		If $fMatch >= 0.75 Then
+			SetLog("Language setting is English: Correct (Attack! button matched by pixels" & ($sRead = "" ? ", OCR read nothing" : "") & ").", $COLOR_INFO)
+			Return True
+		EndIf
+		If Not $g_bRunState Then Return
+		If $i < 3 Then
+			ClearScreen()
+			If _Sleep(1500) Then Return
+			checkMainScreen(False)
+			If _Sleep(500) Then Return
+		EndIf
+	Next
+	SaveFailureImage("Language")
+	If Not ChangeLanguage() Then
 		SetLog("Language setting is Wrong: Change CoC language to English!", $COLOR_ERROR)
 		btnStop()
 	EndIf
-EndFunc
+EndFunc   ;==>TestLanguage
+
+; Jaccard match (0..1) of the bright pixels at the Attack button label against the "Attack!" word
+; as it is printed in English (12 rows x 71 px at 29,698 on the 860x732 screen), best of +-3 px.
+Func __AttackLabelMatch()
+	Local Const $sMask = "....######.......###.......###........................###.........###..|...########.....####......####........................###........####..|...########.....####......####.....####...............###........###...|...###.####.....######....######..#######....#######..###...###..###...|...###..###...#########.#########....#####..######....###..###...###...|..###...####..######....######........####..####......###.####....##...|..###...####....####......####.....#######..###.......#######.....##...|..##########....###.......###....#########..###.......#######.....#....|.###########....###.......###....###...###..###.......#######..........|.###########....###.......###....###...###..####......###.####.........|.###.....####...###.......###....#########..########..###..###...###...|####.....####...###.......###.....########....######..###...###..###..."
+	Local $asMask = StringSplit($sMask, "|", $STR_NOCOUNT)
+	Local Const $iX0 = 20, $iY0 = 694, $iW = 89, $iH = 19 ; probe box around the label
+	_CaptureRegion()
+	Local $asRows[$iH]
+	For $y = 0 To $iH - 1
+		$asRows[$y] = ""
+		For $x = 0 To $iW - 1
+			Local $iCol = Dec(_GetPixelColor($iX0 + $x, $iY0 + $y, False))
+			Local $fLum = 0.3 * BitAND(BitShift($iCol, 16), 0xFF) + 0.59 * BitAND(BitShift($iCol, 8), 0xFF) + 0.11 * BitAND($iCol, 0xFF)
+			$asRows[$y] &= ($fLum > 200 ? "#" : ".")
+		Next
+	Next
+	Local $fBest = 0
+	For $iDY = -3 To 3
+		For $iDX = -3 To 3
+			Local $iInter = 0, $iUnion = 0
+			For $y = 0 To UBound($asMask) - 1
+				For $x = 0 To StringLen($asMask[0]) - 1
+					Local $bM = (StringMid($asMask[$y], $x + 1, 1) = "#")
+					Local $iGY = $y + 4 + $iDY, $iGX = $x + 9 + $iDX ; mask origin (29,698) inside the box (20,694)
+					Local $bG = ($iGY >= 0 And $iGY < $iH And $iGX >= 0 And $iGX < $iW And StringMid($asRows[$iGY], $iGX + 1, 1) = "#")
+					If $bM And $bG Then $iInter += 1
+					If $bM Or $bG Then $iUnion += 1
+				Next
+			Next
+			If $iUnion > 0 And $iInter / $iUnion > $fBest Then $fBest = $iInter / $iUnion
+		Next
+	Next
+	Return $fBest
+EndFunc   ;==>__AttackLabelMatch
 
 Func ChangeLanguage()
 	SetLog("Change Language To English", $COLOR_INFO)

@@ -18,7 +18,7 @@ Func PrepareSearch($Mode = $DB) ;Click attack button and find match button, will
 
 	; RestartSearchPickupHero - Check Remaining Heal Time
 	If $g_bSearchRestartPickupHero And $Mode <> $DT Then
-		Local $pTroopType[$eHeroCount] = [$eKing, $eQueen, $ePrince, $eWarden, $eChampion]
+		Local $pTroopType[$eHeroCount] = [$eKing, $eQueen, $ePrince, $eWarden, $eChampion, $eDuke]
 		For $i = 0 To $eHeroSlots - 1 ; check slots
 			For $pMatchMode = $DB To $g_iModeCount - 1 ; check all attack modes
 				If IsUnitUsed($pMatchMode, $pTroopType[$g_aiCmbCustomHeroOrder[$i]]) Then
@@ -223,7 +223,7 @@ Func PrepareSearch($Mode = $DB) ;Click attack button and find match button, will
 				CloseAttackWindow()
 				Return
 			EndIf
-			If Number($g_aiCurrentLoot[$eLootTrophy]) >= Number($g_asLeagueDetails[21][4]) Then
+			If Number($g_aiCurrentLoot[$eLootTrophy]) >= $g_iLeagueTierLegend Then ; Legend tiers 34-36 since CoC 18.600
 				SetLog("Couldn't find the Attack Button!", $COLOR_ERROR)
 				$g_bRestart = True
 				CloseAttackWindow()

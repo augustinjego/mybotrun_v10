@@ -43,9 +43,11 @@ Func getShieldInfo()
 			$aPBReturnResult[0] = "guard" ; check for personal guard timer
 			SetDebugLog("Guard Active", $COLOR_DEBUG)
 		Case Else
-			SetLog("Sorry, Monkey needs more bananas to read shield type", $COLOR_ERROR) ; Check for pixel colors errors!
-			SetError(1, "Bad shield pixel read")
-			Return
+			; On the main screen this slot only ever shows "none", the guard or a shield. The first
+			; two are matched above by colour; the CoC 18.600.5 shield icon has not been captured
+			; yet, so whatever else sits there is a shield rather than a read error.
+			$aPBReturnResult[0] = "shield"
+			SetDebugLog("Shield Active (icon colour " & _GetPixelColor($aHavePerGuard[0], $aHavePerGuard[1], $g_bCapturePixel) & " not matched, assumed shield)", $COLOR_DEBUG)
 	EndSelect
 
 	$sTimeResult = getOcrGuardShield(538, 21) ; read Shield time

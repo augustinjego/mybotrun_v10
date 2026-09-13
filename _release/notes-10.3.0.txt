@@ -1,0 +1,3 @@
+Discord: the last raid is posted as a card (embed) with gold / elixir / dark elixir, stars, destruction %, league and bonus, coloured by the number of stars, with the raid screenshot attached when "Last raid as image" is on.
+Discord: new "Full log to Discord" option (Village > Notify): every line of the bot log is posted to the webhook as code blocks, in batches every 20 seconds, without making the bot wait for discord.com.
+Telegram: the last raid text shows the league name ("Valkyrie 13") instead of the old trophy count.

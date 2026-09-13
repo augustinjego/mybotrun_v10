@@ -19,13 +19,17 @@ Func chkPBTGenabled()
 	If GUICtrlRead($g_hChkNotifyTGEnable) = $GUI_CHECKED Then
 		$g_bNotifyTGEnable = True
 		GUICtrlSetState($g_hTxtNotifyTGToken, $GUI_ENABLE)
+		GUICtrlSetState($g_hBtnNotifyTestTG, $GUI_ENABLE)
+		GUICtrlSetState($g_hChkNotifyRemote, $GUI_ENABLE) ; remote control reads commands, only Telegram can do that
 	Else
 		$g_bNotifyTGEnable = False
 		GUICtrlSetState($g_hTxtNotifyTGToken, $GUI_DISABLE)
+		GUICtrlSetState($g_hBtnNotifyTestTG, $GUI_DISABLE)
+		GUICtrlSetState($g_hChkNotifyRemote, $GUI_DISABLE)
 	EndIf
 
-	If $g_bNotifyTGEnable = True Then
-		GUICtrlSetState($g_hChkNotifyRemote, $GUI_ENABLE)
+	; the alert options serve both channels, Discord alone is enough to keep them available
+	If $g_bNotifyTGEnable = True Or GUICtrlRead($g_hChkNotifyDiscordEnable) = $GUI_CHECKED Then
 		GUICtrlSetState($g_hTxtNotifyOrigin, $GUI_ENABLE)
 		GUICtrlSetState($g_hChkNotifyAlertMatchFound, $GUI_ENABLE)
 		GUICtrlSetState($g_hChkNotifyAlertLastRaidIMG, $GUI_ENABLE)
@@ -44,7 +48,6 @@ Func chkPBTGenabled()
 		GUICtrlSetState($g_hChkNotifyAlertSmartWaitTime, $GUI_ENABLE)
 		GUICtrlSetState($g_hChkNotifyAlertLaboratoryIdle, $GUI_ENABLE)
 	Else
-		GUICtrlSetState($g_hChkNotifyRemote, $GUI_DISABLE)
 		GUICtrlSetState($g_hTxtNotifyOrigin, $GUI_DISABLE)
 		GUICtrlSetState($g_hChkNotifyAlertMatchFound, $GUI_DISABLE)
 		GUICtrlSetState($g_hChkNotifyAlertLastRaidIMG, $GUI_DISABLE)
@@ -64,6 +67,21 @@ Func chkPBTGenabled()
 		GUICtrlSetState($g_hChkNotifyAlertLaboratoryIdle, $GUI_DISABLE)
 	EndIf
 EndFunc   ;==>chkPBTGenabled
+
+Func chkDiscordEnabled()
+	If GUICtrlRead($g_hChkNotifyDiscordEnable) = $GUI_CHECKED Then
+		$g_bNotifyDiscordEnable = True
+		GUICtrlSetState($g_hTxtNotifyDiscordWebhook, $GUI_ENABLE)
+		GUICtrlSetState($g_hBtnNotifyTestDiscord, $GUI_ENABLE)
+		GUICtrlSetState($g_hChkNotifyDiscordFullLog, $GUI_ENABLE)
+	Else
+		$g_bNotifyDiscordEnable = False
+		GUICtrlSetState($g_hTxtNotifyDiscordWebhook, $GUI_DISABLE)
+		GUICtrlSetState($g_hBtnNotifyTestDiscord, $GUI_DISABLE)
+		GUICtrlSetState($g_hChkNotifyDiscordFullLog, $GUI_DISABLE)
+	EndIf
+	chkPBTGenabled() ; refresh the shared alert options
+EndFunc   ;==>chkDiscordEnabled
 
 Func chkNotifyHours()
 	Local $b = GUICtrlRead($g_hChkNotifyOnlyHours) = $GUI_CHECKED
@@ -112,3 +130,34 @@ Func ChkNotifyWeekdaysE()
 	Sleep(300)
 	GUICtrlSetState($g_ahChkNotifyWeekdaysE, $GUI_UNCHECKED)
 EndFunc   ;==>ChkNotifyWeekdaysE
+
+; "Test" buttons of the Notify tab: they use what is typed in the fields right now, saved or not,
+; so a user can check a token or a webhook before the first attack instead of after it.
+Func btnNotifyTestTG()
+	Local $sToken = StringStripWS(GUICtrlRead($g_hTxtNotifyTGToken), 3)
+	If $sToken = "" Then
+		SetLog("Telegram test: enter the bot token first", $COLOR_ERROR)
+		Return
+	EndIf
+	SetLog("Telegram test: sending...", $COLOR_INFO)
+	NotifyTestTelegram($sToken)
+EndFunc   ;==>btnNotifyTestTG
+
+Func btnNotifyTestDiscord()
+	Local $sHook = StringStripWS(GUICtrlRead($g_hTxtNotifyDiscordWebhook), 3)
+	If $sHook = "" Then
+		SetLog("Discord test: paste the webhook URL first", $COLOR_ERROR)
+		Return
+	EndIf
+	SetLog("Discord test: sending...", $COLOR_INFO)
+	NotifyTestDiscord($sHook)
+EndFunc   ;==>btnNotifyTestDiscord
+
+Func chkDiscordFullLog()
+	$g_bNotifyDiscordFullLog = (GUICtrlRead($g_hChkNotifyDiscordFullLog) = $GUI_CHECKED)
+	If $g_bNotifyDiscordFullLog Then
+		SetLog("Full log to Discord: on, batches every " & Int($g_iNotifyDiscordLogInterval / 1000) & " s", $COLOR_INFO)
+	Else
+		NotifyDiscordLogFlush(True) ; send what is queued, then stop
+	EndIf
+EndFunc   ;==>chkDiscordFullLog

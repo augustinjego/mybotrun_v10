@@ -238,17 +238,20 @@ EndFunc   ;==>BotCommand
 ; Link ..........: https://github.com/MyBotRun/MyBot/wiki
 ; Example .......: No
 ; ===============================================================================================================================
+; $eLootTrophy carries the CoC 18.600 league tier (1-36) since trophies were removed; $g_iDropTrophyMax
+; is now "Max. league tier" (Search & Attack -> Options -> League), so despite the old name this still
+; means "stop attacking once above this tier".
 Func isTrophyMax()
 	If Number($g_aiCurrentLoot[$eLootTrophy]) > Number($g_iDropTrophyMax) Then
-		SetLog("Max. Trophy Reached!", $COLOR_SUCCESS)
+		SetLog("Max. League Tier Reached!", $COLOR_SUCCESS)
 		If _Sleep($DELAYBOTCOMMAND1) Then Return
 		$g_abFullStorage[$eLootTrophy] = True
 	ElseIf $g_abFullStorage[$eLootTrophy] Then
 		If Number($g_aiCurrentLoot[$eLootTrophy]) >= Number($g_aiResumeAttackLoot[$eLootTrophy]) Then
-			SetLog("Trophy is still relatively high: " & $g_aiCurrentLoot[$eLootTrophy], $COLOR_SUCCESS)
+			SetLog("League tier is still relatively high: " & $g_aiCurrentLoot[$eLootTrophy], $COLOR_SUCCESS)
 			$g_abFullStorage[$eLootTrophy] = True
 		Else
-			SetLog("Switching back to normal when Trophy drops below " & $g_aiResumeAttackLoot[$eLootTrophy], $COLOR_SUCCESS)
+			SetLog("Switching back to normal when league tier drops below " & $g_aiResumeAttackLoot[$eLootTrophy], $COLOR_SUCCESS)
 			$g_abFullStorage[$eLootTrophy] = False
 		EndIf
 	EndIf

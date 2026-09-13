@@ -29,7 +29,7 @@ Global $aAway[2] = [175, 10] ; Away click, moved from 1,1 to prevent scroll wind
 Global $aAway2[2] = [235, 10] ; Second Away Position for Windows like Donate Window where at $aAway is a button
 Global $aNoShield[4] = [524, 18, 0x494C4D, 15] ; Main Screen, charcoal pixel center of shield when no shield is present / BS5.10 March 2023
 Global $aHaveShield[4] = [523, 19, 0xEBF7FB, 15] ; Main Screen, Silver pixel top center of shield
-Global $aHavePerGuard[4] = [523, 19, 0x7E4CDB, 15] ; Main Screen, Purple Pixel Top of Shield
+Global $aHavePerGuard[4] = [523, 20, 0xDB9101, 20] ; Main Screen, orange body of the CoC 18.600.5 guard icon (shield with a silver star), measured on a live capture
 Global $aShieldInfoButton[4] = [515, 10, 0x7ABDE3, 15] ; Main Screen, Blue pixel upper part of "i"
 Global $aIsShieldInfo[4] = [675, 155, 0xFF8D95, 20] ; Main Screen, Shield Info window, red pixel right of X
 Global $aSurrenderButton[4] = [70, 545 + $g_iBottomOffsetY, 0xCE0D0E, 40] ; Surrender Button, Attack Screen (End Battle August 2023)
@@ -59,7 +59,10 @@ Global $aArmyCCRemainTime[2] = [780, 470 + $g_iMidOffsetY] ; Training Window Ove
 Global $aIsCampFull[4] = [82, 177 + $g_iMidOffsetY, 0xFFFFFF, 10] ; Training Window, Overview screen White pixel in check mark with camp IS full
 Global $aBuildersDigits[2] = [424, 21] ; Main Screen, Free/Total Builders
 Global $aBuildersDigitsBuilderBase[2] = [0, 21] ; Main Screen on Builders Base Free/Total Builders
-Global $aTrophies[2] = [69, 84] ; Main Screen, Trophies
+Global $aTrophies[2] = [69, 84] ; Main Screen, Trophies (gone since the CoC 18.600 league tiers, kept for the old code paths)
+; CoC 18.600 league tiers: the number sits in the bottom right corner of the league badge, digits 8 px high
+Global $aLeagueTierMain[4] = [42, 99, 54, 109] ; Main Screen, digit box of the own league badge under the XP badge (9 px cream digits, "13" at 43-52 x 100-108)
+Global $aLeagueTierEnemy[4] = [30, 36, 44, 47] ; Attack Page, digit box of the enemy league badge left of the name (10 px cream digits, "15" at 31-41 x 37-46)
 Global $aNoCloudsAttack[4] = [25, 546 + $g_iBottomOffsetY, 0xCF0D0E, 20] ; Attack Screen: No More Clouds
 Global $aArmyTrainButton[2] = [40, 525 + $g_iBottomOffsetY] ; Main Screen, Army Train Button
 Global $aWonOneStar[4] = [714, 538 + $g_iBottomOffsetY, 0xC0C8C0, 20] ; Center of 1st Star for winning attack on enemy
@@ -132,6 +135,7 @@ Global $aPrinceHealth = [-1, 568 + $g_iBottomOffsetY, 0x00D500, 15, 8]
 Global $aWardenHealth = [-1, 567 + $g_iBottomOffsetY, 0x00D500, 15, 10]
 ; Champion Health Bar, check at the middle of the bar, index - 2 is x-offset added to middle of health bar
 Global $aChampionHealth = [-1, 566 + $g_iBottomOffsetY, 0x00D500, 15, 2]
+Global $aDukeHealth = [-1, 566 + $g_iBottomOffsetY, 0x00D500, 15, 2] ; same health bar geometry as the other heroes
 
 ; attack report... stars won
 Global $aWonOneStarAtkRprt[4] = [325, 180 + $g_iMidOffsetY, 0xC8CAC4, 30] ; Center of 1st Star reached attacked village
@@ -139,7 +143,7 @@ Global $aWonTwoStarAtkRprt[4] = [398, 180 + $g_iMidOffsetY, 0xD0D6D0, 30] ; Cent
 Global $aWonThreeStarAtkRprt[4] = [534, 180 + $g_iMidOffsetY, 0xC8CAC7, 30] ; Center of 3rd Star reached attacked village
 ; pixel color: location information								BS 850MB (Reg GFX), BS 500MB (Med GFX) : location
 
-Global $NextBtn[4] = [720, 536 + $g_iBottomOffsetY, 0xE6530D, 20] ;  Next Button
+Global $NextBtn[4] = [720, 536 + $g_iBottomOffsetY, 0xF57627, 20] ;  Next Button, orange body of the CoC 18.600.5 button (x 700-850, y 545-612), stable on 12 live frames
 Global $a12OrMoreSlots[4] = [850, 662 + $g_iBottomOffsetY, 0x3A396E, 25] ; Attackbar Check if 12+ Slots exist
 Global $aDoubRowAttackBar[4] = [68, 486, 0xFC5D64, 20]
 Global $aTroopIsDeployed[4] = [0, 0, 0x404040, 20] ; Attackbar Remain Check X and Y are Dummies

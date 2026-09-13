@@ -361,9 +361,9 @@ Func _ClanGames($test = False, $HaltMode = False)
 								If $BattleChallenges[$j][1] = "Attack Up" And $g_iTownHallLevel = $g_iMaxTHLevel Then ExitLoop
 
 								; Check your Trophy Range
-								If $BattleChallenges[$j][1] = "Slaying The Titans" And (Int($g_aiCurrentLoot[$eLootTrophy]) < 4100 Or Int($g_aiCurrentLoot[$eLootTrophy]) > 5000) Then ExitLoop
+								If $BattleChallenges[$j][1] = "Slaying The Titans" And (Int($g_aiCurrentLoot[$eLootTrophy]) < $g_iLeagueTierTitan Or Int($g_aiCurrentLoot[$eLootTrophy]) >= $g_iLeagueTierLegend) Then ExitLoop ; Titan/Dragon/Electro tiers 25-33
 
-								If $BattleChallenges[$j][1] = "Clash of Legends" And Int($g_aiCurrentLoot[$eLootTrophy]) < 5000 Then ExitLoop
+								If $BattleChallenges[$j][1] = "Clash of Legends" And Int($g_aiCurrentLoot[$eLootTrophy]) < $g_iLeagueTierLegend Then ExitLoop ; Legend tiers 34-36
 
 								; Check if exist a probability to use any Spell
 								If $BattleChallenges[$j][1] = "No-Magic Zone" And (($g_iMatchMode = $DB And $g_aiAttackAlgorithm[$DB] = 1) Or ($g_iMatchMode = $LB And $g_aiAttackAlgorithm[$LB] = 1)) Then ExitLoop

@@ -31,11 +31,13 @@ Func PrepareAttack($pMatchMode, $bRemaining = False) ;Assigns troops
 		$g_bDropPrince = False
 		$g_bDropWarden = False
 		$g_bDropChampion = False
+		$g_bDropDuke = False
 		If $g_iActivateKing = 1 Or $g_iActivateKing = 2 Then $g_aHeroesTimerActivation[$eHeroBarbarianKing] = 0
 		If $g_iActivateQueen = 1 Or $g_iActivateQueen = 2 Then $g_aHeroesTimerActivation[$eHeroArcherQueen] = 0
 		If $g_iActivatePrince = 1 Or $g_iActivatePrince = 2 Then $g_aHeroesTimerActivation[$eHeroMinionPrince] = 0
 		If $g_iActivateWarden = 1 Or $g_iActivateWarden = 2 Then $g_aHeroesTimerActivation[$eHeroGrandWarden] = 0
 		If $g_iActivateChampion = 1 Or $g_iActivateChampion = 2 Then $g_aHeroesTimerActivation[$eHeroRoyalChampion] = 0
+		If $g_iActivateDuke = 1 Or $g_iActivateDuke = 2 Then $g_aHeroesTimerActivation[$eHeroDragonDuke] = 0
 
 		$g_iTotalAttackSlot = 10 ; reset flag - Slot11+
 		$g_bDraggedAttackBar = False
@@ -71,6 +73,8 @@ Func PrepareAttack($pMatchMode, $bRemaining = False) ;Assigns troops
 					$bDropped = $g_bDropWarden
 				Case $eChampion
 					$bDropped = $g_bDropChampion
+				Case $eDuke
+					$bDropped = $g_bDropDuke
 			EndSwitch
 			If $bDropped = False Then
 				SetDebugLog("Discard updating hero " & GetTroopName($g_avAttackTroops[$i][0]) & " because not dropped yet")
@@ -356,6 +360,8 @@ Func IsUnitUsed($iMatchMode, $iTroopIndex)
 					If (BitAND($g_aiAttackUseHeroes[$iMatchMode], $eHeroWarden) = $eHeroWarden) Then Return True
 				Case $eChampion
 					If (BitAND($g_aiAttackUseHeroes[$iMatchMode], $eHeroChampion) = $eHeroChampion) Then Return True
+				Case $eDuke
+					If (BitAND($g_aiAttackUseHeroes[$iMatchMode], $eHeroDuke) = $eHeroDuke) Then Return True
 				Case $eCastle, $eWallW, $eBattleB, $eStoneS, $eSiegeB, $eLogL, $eFlameF, $eBattleD, $eTroopL
 					If $g_abAttackDropCC[$iMatchMode] Then Return True
 				Case $eLSpell

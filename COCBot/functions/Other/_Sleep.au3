@@ -67,6 +67,7 @@ Func _Sleep($iDelay, $iSleep = True, $CheckRunState = True, $SleepWhenPaused = T
 				NotifyRemoteControl()
 				$hTimer_PBRemoteControlInterval = __TimerInit()
 			EndIf
+			NotifyDiscordLogFlush() ; full log to Discord option, posts the queued lines every 20 s
 ;~ 			If __TimerDiff($hTimer_PBDeleteOldPushesInterval) >= $g_iPBDeleteOldPushesInterval  Then
 ;~ 				PushBulletDeleteOldPushes()
 ;~ 				$hTimer_PBDeleteOldPushesInterval = __TimerInit()

@@ -1,6 +1,6 @@
 ; #FUNCTION# ====================================================================================================================
 ; Name ..........: MBR GUI Design
-; Description ...: This file creates the "Trophy Settings" tab under the "Options" tab under the "Search & Attack" tab under the "Attack Plan" tab
+; Description ...: This file creates the "League" tab (formerly "Trophy Settings", trophies are gone since CoC 18.600) under the "Options" tab under the "Search & Attack" tab under the "Attack Plan" tab
 ; Syntax ........:
 ; Parameters ....: None
 ; Return values .: None
@@ -25,22 +25,34 @@ Func CreateAttackSearchOptionsTrophySettings()
 
 	Local $sTxtTip = ""
 	Local $x = 25, $y = 45
-	GUICtrlCreateGroup(GetTranslatedFileIni("MBR GUI Design Child Attack - Options-TrophySettings", "Group_01", "Trophy Settings"), $x - 20, $y - 20, $g_iSizeWGrpTab4, $g_iSizeHGrpTab4)
+	GUICtrlCreateGroup(GetTranslatedFileIni("MBR GUI Design Child Attack - Options-TrophySettings", "Group_01", "League tier"), $x - 20, $y - 20, $g_iSizeWGrpTab4, $g_iSizeHGrpTab4)
 	$x += 25
 	$y += 25
 	_GUICtrlCreateIcon($g_sLibIconPath, $eIcnTrophy, $x - 15, $y, 64, 64, $BS_ICON)
 
+	; CoC 18.600 replaced trophies with 36 league tiers that cannot be dropped on purpose, so the drop
+	; trophy controls below are still created (the config code reads and writes them) but stay hidden.
+	; Only the max tier survives: it feeds the "Max.League" bot conditions of Village -> Misc.
+	GUICtrlCreateLabel(GetTranslatedFileIni("MBR GUI Design Child Attack - Options-TrophySettings", "LblLeagueInfo", "Since CoC 18.600 there are no trophies any more: the league is a tier from 1 (Skeleton 1) to 36 (Legend I), read on the badge of the main screen. Tiers cannot be dropped on purpose, so the old trophy drop options are gone."), $x + 55, $y - 5, 300, 60)
+	$y += 62
+	GUICtrlCreateLabel(GetTranslatedFileIni("MBR GUI Design Child Attack - Options-TrophySettings", "LblMaxLeague", "Max. league tier") & ":", $x + 55, $y + 3, 90, -1)
+	_GUICtrlSetTip(-1, GetTranslatedFileIni("MBR GUI Design Child Attack - Options-TrophySettings", "LblMaxLeague_Info_01", "The Max.League bot conditions (Village -> Misc) stop attacking once your tier is above this value (1-36, 36 = never)."))
+
 	$x += 50
 	$g_hChkTrophyRange = GUICtrlCreateCheckbox(GetTranslatedFileIni("MBR GUI Design Child Attack - Options-TrophySettings", "ChkTrophyRange", "Trophy range") & ":", $x + 20, $y, -1, -1)
 	GUICtrlSetOnEvent(-1, "chkTrophyRange")
+	GUICtrlSetState(-1, $GUI_HIDE)
 	$g_hTxtDropTrophy = GUICtrlCreateInput("5000", $x + 110, $y, 35, -1, BitOR($GUI_SS_DEFAULT_INPUT, $ES_CENTER, $ES_NUMBER))
 	GUICtrlSetLimit(-1, 4)
 	_GUICtrlSetTip(-1, GetTranslatedFileIni("MBR GUI Design Child Attack - Options-TrophySettings", "TxtDropTrophy_Info_01", "MIN: The Bot will drop trophies until below this value."))
-	GUICtrlSetState(-1, $GUI_DISABLE)
+	GUICtrlSetState(-1, $GUI_HIDE)
 	GUICtrlSetOnEvent(-1, "TxtDropTrophy")
 
+	; The Min/Max trophy badge icons below matched trophy counts (0-6000) to a league banner; they have
+	; no meaningful mapping to a 1-36 tier, so the whole row is created (config code still expects the
+	; handles) but kept hidden. Only the plain "Max. league tier" number above is shown to the user.
 	$g_hPicMinTrophies[$eLeagueUnranked] = _GUICtrlCreateIcon($g_sLibIconPath, $eUnranked, $x + 116, $y - 30, 24, 24)
-	GUICtrlSetState(-1, $GUI_SHOW)
+	GUICtrlSetState(-1, $GUI_HIDE)
 	$g_hPicMinTrophies[$eLeagueBronze] = _GUICtrlCreateIcon($g_sLibIconPath, $eBronze, $x + 116, $y - 30, 24, 24)
 	GUICtrlSetState(-1, $GUI_HIDE)
 	$g_hPicMinTrophies[$eLeagueSilver] = _GUICtrlCreateIcon($g_sLibIconPath, $eSilver, $x + 116, $y - 30, 24, 24)
@@ -60,16 +72,15 @@ Func CreateAttackSearchOptionsTrophySettings()
 	$g_hLblMinTrophies = GUICtrlCreateLabel("", $x + 133, $y - 15, 17, 17, $SS_CENTER)
 	GUICtrlSetFont(-1, 9, $FW_BOLD, Default, "Arial", $CLEARTYPE_QUALITY)
 	GUICtrlSetColor(-1, $COLOR_BLACK)
+	GUICtrlSetState(-1, $GUI_HIDE)
 
-	GUICtrlCreateLabel("-", $x + 148, $y + 4, -1, -1)
-	$g_hTxtMaxTrophy = GUICtrlCreateInput("5000", $x + 155, $y, 35, -1, BitOR($GUI_SS_DEFAULT_INPUT, $ES_CENTER, $ES_NUMBER))
-	GUICtrlSetLimit(-1, 4)
-	_GUICtrlSetTip(-1, GetTranslatedFileIni("MBR GUI Design Child Attack - Options-TrophySettings", "TxtMaxTrophy_Info_01", "MAX: The Bot will drop trophies if your trophy count is greater than this value."))
-	GUICtrlSetState(-1, $GUI_DISABLE)
+	$g_hTxtMaxTrophy = GUICtrlCreateInput("36", $x + 100, $y, 30, -1, BitOR($GUI_SS_DEFAULT_INPUT, $ES_CENTER, $ES_NUMBER))
+	GUICtrlSetLimit(-1, 2)
+	_GUICtrlSetTip(-1, GetTranslatedFileIni("MBR GUI Design Child Attack - Options-TrophySettings", "TxtMaxTrophy_Info_01", "MAX: the Max.League bot conditions stop attacking when your league tier is greater than this value (1-36, 36 = never)."))
 	GUICtrlSetOnEvent(-1, "TxtMaxTrophy")
 
 	$g_hPicMaxTrophies[$eLeagueUnranked] = _GUICtrlCreateIcon($g_sLibIconPath, $eUnranked, $x + 161, $y - 30, 24, 24)
-	GUICtrlSetState(-1, $GUI_SHOW)
+	GUICtrlSetState(-1, $GUI_HIDE)
 	$g_hPicMaxTrophies[$eLeagueBronze] = _GUICtrlCreateIcon($g_sLibIconPath, $eBronze, $x + 161, $y - 30, 24, 24)
 	GUICtrlSetState(-1, $GUI_HIDE)
 	$g_hPicMaxTrophies[$eLeagueSilver] = _GUICtrlCreateIcon($g_sLibIconPath, $eSilver, $x + 161, $y - 30, 24, 24)
@@ -89,6 +100,7 @@ Func CreateAttackSearchOptionsTrophySettings()
 	$g_hLblMaxTrophies = GUICtrlCreateLabel("", $x + 178, $y - 15, 17, 17, $SS_CENTER)
 	GUICtrlSetFont(-1, 9, $FW_BOLD, Default, "Arial", $CLEARTYPE_QUALITY)
 	GUICtrlSetColor(-1, $COLOR_BLACK)
+	GUICtrlSetState(-1, $GUI_HIDE)
 
 	$y += 24
 	$x += 20

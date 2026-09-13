@@ -26,6 +26,7 @@ Global $g_hPicABLightSpell = 0, $g_hPicABHealSpell = 0, $g_hPicABRageSpell = 0, 
 		$g_hPicABOvergrowthSpell = 0
 
 Global $g_hCmbABSiege = 0, $g_hCmbABWardenMode = 0, $g_hChkABChampionAttack = 0, $g_hPicABChampionAttack = 0
+Global $g_hChkABDukeAttack = 0, $g_hPicABDukeAttack = 0
 Global $g_hChkABPrinceAttack = 0, $g_hPicABPrinceAttack = 0
 
 Func CreateAttackSearchActiveBaseAttack()
@@ -105,6 +106,15 @@ Func CreateAttackSearchActiveBaseAttack()
 	_GUICtrlSetTip(-1, $sTxtTip)
 	$g_hChkABChampionAttack = GUICtrlCreateCheckbox("", $x + 27, $y, 17, 17)
 	_GUICtrlSetTip(-1, $sTxtTip)
+
+	$x += 46
+	$g_hPicABDukeAttack = _GUICtrlCreateIcon($g_sLibIconPath, $eIcnDuke, $x, $y, 24, 24)
+	$sTxtTip = GetTranslatedFileIni("MBR GUI Design Child Attack - Attack", "Chk-Use-Duke_Info_01", "Use your Dragon Duke when Attacking...") & @CRLF & _
+			GetTranslatedFileIni("MBR GUI Design Child Attack - Attack", "Chk-Use-Duke_Info_02", "Enabled with TownHall 15 and higher")
+	_GUICtrlSetTip(-1, $sTxtTip)
+	$g_hChkABDukeAttack = GUICtrlCreateCheckbox("", $x + 27, $y, 17, 17)
+	_GUICtrlSetTip(-1, $sTxtTip)
+	$x -= 46
 
 	$y += 27
 	$g_hPicABDropCC = _GUICtrlCreateIcon($g_sLibIconPath, $eIcnCC, $x, $y, 24, 24)

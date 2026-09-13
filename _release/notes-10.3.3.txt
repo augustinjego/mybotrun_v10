@@ -1,0 +1,1 @@
+﻿Language check at start: when the OCR reads nothing on the Attack button, the white pixels of the label are compared to the English "Attack!" word (pixel match) before the game is declared not in English; the bot no longer stops on an OCR miss.

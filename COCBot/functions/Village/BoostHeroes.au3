@@ -103,3 +103,22 @@ Func BoostChampion()
 	If _Sleep($DELAYBOOSTBARRACKS3) Then Return
 	checkMainScreen(False) ; Check for errors during function
 EndFunc   ;==>BoostChampion
+
+Func BoostDuke()
+	; Verifying existent Variables to run this routine
+	If AllowBoosting("Dragon Duke", $g_iCmbBoostDuke) = False Then Return
+
+	SetLog("Boost Dragon Duke...", $COLOR_INFO)
+	If $g_aiHeroHallPos[0] = "" Or $g_aiHeroHallPos[0] = -1 Then
+		LocateHeroHall()
+		SaveConfig()
+		If _Sleep($DELAYBOOSTHEROES4) Then Return
+	EndIf
+
+	; BoostStructure finds the hero by the name read in the boost window, so nothing is clicked unless "Duke" is read
+	If BoostStructure("Dragon Duke", "Duke", $g_aiHeroHallPos, $g_iCmbBoostDuke, $g_hCmbBoostDuke) Then $g_aiHeroBoost[$eHeroDragonDuke] = _NowCalc()
+	$g_aiTimeTrain[2] = 0 ; reset Heroes remaining time
+
+	If _Sleep($DELAYBOOSTBARRACKS3) Then Return
+	checkMainScreen(False) ; Check for errors during function
+EndFunc   ;==>BoostDuke

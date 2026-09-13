@@ -175,7 +175,7 @@ Func CheckIfArmyIsReady($IstoOpen = True)
 	If StringRight($sLogText, 1) = "," Then $sLogText = StringTrimRight($sLogText, 1) ; Remove last "," as it is not needed
 
 	If $g_bIsFullArmywithHeroesAndSpells Then
-		If $g_bNotifyTGEnable And $g_bNotifyAlertCampFull Then PushMsg("CampFull")
+		If NotifyEnabled() And $g_bNotifyAlertCampFull Then PushMsg("CampFull")
 		SetLog("Chief, is your Army ready? Yes, it is!", $COLOR_SUCCESS)
 	Else
 		SetLog("Chief, is your Army ready? No, not yet!", $COLOR_ACTION)

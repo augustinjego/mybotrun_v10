@@ -619,6 +619,28 @@ Func _GUICtrlCreateIcon($filename, $iconName, $left, $top, $width = 32, $height 
 EndFunc   ;==>_GUICtrlCreateIcon
 
 ; #FUNCTION# ====================================================================================================================
+; Name ..........: _GUICtrlCreatePng
+; Description ...: Shows a PNG file in a Pic control, for art the icon library does not carry
+; Syntax ........: _GUICtrlCreatePng($sFile, $left, $top[, $width = 32[, $height = 32]])
+; Remarks .......: This file is part of MyBot Copyright 2015-2025
+;                  A Pic control cannot blend an alpha channel, so the image is flattened on the
+;                  dialog face colour (GetSysColor 15 = COLOR_3DFACE) the way the icons are.
+; ===============================================================================================================================
+Func _GUICtrlCreatePng($sFile, $left, $top, $width = 32, $height = 32)
+	Local $controlID = GUICtrlCreatePic("", $left, $top, $width, $height)
+	Local $hImage = _GDIPlus_ImageLoadFromFile($sFile)
+	If @error Or $hImage = 0 Then Return $controlID
+	Local $aColor = DllCall("user32.dll", "int", "GetSysColor", "int", 15) ; BGR
+	Local $iBGR = (IsArray($aColor) ? $aColor[0] : 0xF0F0F0)
+	Local $iARGB = BitOR(0xFF000000, BitShift(BitAND($iBGR, 0xFF), -16), BitAND($iBGR, 0xFF00), BitShift(BitAND($iBGR, 0xFF0000), 16))
+	Local $hBmp = _GDIPlus_BitmapCreateHBITMAPFromBitmap($hImage, $iARGB)
+	_GDIPlus_ImageDispose($hImage)
+	_WinAPI_DeleteObject(GUICtrlSendMsg($controlID, $STM_SETIMAGE, 0, $hBmp))
+	_WinAPI_DeleteObject($hBmp)
+	Return $controlID
+EndFunc   ;==>_GUICtrlCreatePng
+
+; #FUNCTION# ====================================================================================================================
 ; Name ..........: _GUICtrlSetImage
 ; Description ...: Support icon change for _GUICtrlCreateIcon
 ; Syntax ........: see GUICtrlSetImage

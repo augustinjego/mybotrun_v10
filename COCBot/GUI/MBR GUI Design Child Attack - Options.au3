@@ -39,7 +39,7 @@ Func CreateAttackSearchOptions()
 		CreateAttackNewSmartZap()
 	$g_hGUI_ATTACKOPTION_TAB_ITEM4 = GUICtrlCreateTabItem(GetTranslatedFileIni("MBR Main GUI", "Tab_03_STab_02_STab_0X_STab_03", -1))
 		CreateAttackSearchOptionsEndBattle()
-	$g_hGUI_ATTACKOPTION_TAB_ITEM5 = GUICtrlCreateTabItem(GetTranslatedFileIni("MBR Main GUI", "Tab_03_STab_02_STab_05_STab_02", "Trophy Settings"))
+	$g_hGUI_ATTACKOPTION_TAB_ITEM5 = GUICtrlCreateTabItem(GetTranslatedFileIni("MBR Main GUI", "Tab_03_STab_02_STab_05_STab_02", "League"))
 		CreateAttackSearchOptionsTrophySettings()
 	GUICtrlCreateTabItem("")
 
